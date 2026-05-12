@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p app/db app/tools app/prompts app/agents)",
+      "Bash(python -c ' *)"
+    ],
+    "additionalDirectories": [
+      "e:\\质量办文件\\project_agent\\PQM_agent\\PQM\\app\\db"
+    ]
+  }
+}
