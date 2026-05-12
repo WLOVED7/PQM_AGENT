@@ -1,313 +1,391 @@
 # 质量检验知识库 (PQM)
 
-> FastAPI + SQLAlchemy 2.0 (异步) + MySQL 8 质量检验文档管理系统
-
-[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
+> 多 Agent 系统 — LangGraph + Session 记忆 + Text2SQL
 
 ## 项目背景
 
-### 什么是 SIP？
+**PQM (Product Quality Management)** — 面向制造业的质量检验知识库系统。
 
-SIP = **Standard Inspection Procedure** (标准检验规程)
-
-制造业在生产零件时，需要按照标准文件对零件进行检验。这个标准文件就是 SIP。
-
-### 一个 SIP 文档的例子：
-
-```json
-{
-  "document_id": "VHST-SIP-SA2HG-014",
-  "customer": "比亚迪",
-  "project": "SA2HG",
-  "part_num": "SA2HG-5101311",
-  "part_name": "前横梁",
-  "document_type": "SIP",
-  "version": "A/6",
-  "drawing_version": "B/0",
-  "mold_num": "MH-12345",
-  "prepared_date": "2024-01-15",
-  "status": "active"
-}
-```
-
-检验项目：
-- 外观检验 - 不允许有生锈、开裂、压伤
-- 尺寸检验 - 长度500±0.5mm
-- 硬度检验 - HRC 45-55
-- 材料成分检验 - 碳含量0.15%-0.25%
-
-### 系统解决什么问题？
-
-| 问题 | 解决方案 |
-|------|----------|
-| 纸质文档难管理 | 数字化存储到 MySQL |
-| 查询不方便 | 提供 REST API 接口 |
-| Agent 无法理解数据 | 标准化 schema + chunk_text |
-| 自然语言查询 | 支持 Text2SQL |
-| 全文搜索 | MySQL FULLTEXT 索引 |
+核心功能：
+- **Text2SQL Agent**: 自然语言转 SQL 查询
+- **RAG 检索**: 文档向量检索（规划中）
+- **多 Agent 协作**: Coordinator + SQL Agent + Critic Agent
 
 ---
 
 ## 系统架构
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        质量检验知识库                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐                   │
-│  │  JSON    │    │  FastAPI │    │  MySQL   │                   │
-│  │  数据    │───▶│   API    │───▶│  数据库   │                   │
-│  └──────────┘    └──────────┘    └──────────┘                   │
-│       │               │               │                         │
-│       ▼               ▼               ▼                         │
-│  import_data.py   CRUD API      3张核心表                        │
-│                       │         ┌─────────────┐                  │
-│                       └────────▶│ documents   │ ← SIP主表        │
-│                                 ├─────────────┤                  │
-│                                 │inspection_  │ ← 检验项目       │
-│                                 │  items      │                  │
-│                                 ├─────────────┤                  │
-│                                 │document_    │ ← 版本变更       │
-│                                 │ changes     │                  │
-│                                 └─────────────┘                  │
-└─────────────────────────────────────────────────────────────────┘
-
-未来扩展：
-                              ┌──────────┐
-                              │  Agent   │ ← Text2SQL 自然语言查询
-                              └──────────┘
-                              ┌──────────┐
-                              │   RAG    │ ← 向量检索
-                              └──────────┘
+用户问题
+    ↓
+┌──────────────────────────────────────────────────────────┐
+│                    LangGraph 主图                          │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌─────────────┐                                         │
+│  │ Coordinator │ ─── 意图识别 (LLM)                        │
+│  │  (感知)     │                                         │
+│  └──────┬──────┘                                         │
+│         │                                                 │
+│    ┌────┴────┐                                           │
+│    ↓         ↓                                           │
+│  SQL         RAG                                         │
+│    │         │                                           │
+│    ↓         ↓                                           │
+│  ┌──────────────┐                                         │
+│  │   Critic     │ ─── SQL 审查 + 重试                      │
+│  │   (理解)     │                                         │
+│  └──────┬──────┘                                         │
+│         │                                                 │
+│         ↓                                                 │
+│  ┌──────────────┐                                         │
+│  │ SQL 执行器   │ ─── 执行 SQL                             │
+│  │   (执行)     │                                         │
+│  └──────┬──────┘                                         │
+│         │                                                 │
+│         ↓                                                 │
+│  ┌──────────────┐                                         │
+│  │   结果汇总   │                                         │
+│  └──────────────┘                                         │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+         │
+         ↓
+┌─────────────────┐
+│ Session Memory  │ ←── 记忆系统
+│   (记忆)        │
+└─────────────────┘
 ```
+
+### 核心要素
+
+| 要素 | 说明 |
+|------|------|
+| **感知** | Coordinator Agent 通过 LLM 理解用户问题 |
+| **理解** | 意图识别 + Schema 上下文 + 同义词映射 |
+| **执行** | SQL 生成 → Critic 审查 → 执行 → 结果汇总 |
+| **记忆** | Session 级内存存储，对话历史自动管理 |
 
 ---
 
-## 项目结构
+## 多 Agent 详解
+
+### 1. Coordinator Agent (协调者)
+
+**职责：** 意图识别，决定走 SQL 还是 RAG
+
+- 通过 LLM 分析用户问题
+- 识别 DATABASE_QUERY / DOCUMENT_SEARCH / MIXED 意图
+- 考虑对话历史上下文中
+
+### 2. SQL Agent (SQL 执行者)
+
+**职责：** 生成并执行 SQL 查询
+
+**子节点：**
+- `sql_generation` — 调用 LLM 生成 SQL
+- `sql_execution` — 执行 SQL，返回结果
+
+### 3. Critic Agent (审查者)
+
+**职责：** 三层验证 + 重试机制
+
+**验证层次：**
+1. **安全校验** — SQL 注入防护（黑名单/白名单）
+2. **Schema 校验** — 表/字段是否存在
+3. **语义校验** — SQL 能否回答用户问题
+
+**重试逻辑：**
+- `needs_regeneration=True` + `retry_count < max` → 重新生成
+- `retry_count >= max` → 返回错误
+
+### 4. Session Memory (记忆系统)
+
+**职责：** 管理对话历史
+
+**功能：**
+- `add_message()` — 添加消息
+- `get_history()` — 获取历史记录
+- `get_context_for_llm()` — 生成 LLM 上下文
+- `clear_session()` — 清除会话
+
+---
+
+## 目录结构
 
 ```
 PQM/
 ├── app/
-│   ├── api/              # FastAPI 路由 (接口定义)
-│   │   ├── documents.py       # 文档管理接口
-│   │   ├── inspection_items.py # 检验项目管理接口
-│   │   └── document_changes.py # 变更记录接口
+│   ├── main.py                  # FastAPI 入口
 │   │
-│   ├── models/           # SQLAlchemy ORM 模型 (数据库表结构)
+│   ├── api/
+│   │   └── agent.py            # Agent API 端点
 │   │
-│   ├── schemas/          # Pydantic 模型 (API 数据验证)
+│   ├── graph/                   # LangGraph 核心
+│   │   ├── __init__.py
+│   │   ├── state.py            # AgentState 定义
+│   │   ├── nodes.py            # 节点统一导出
+│   │   ├── edges.py            # 边路由逻辑
+│   │   └── pqm_graph.py        # LangGraph 主图
 │   │
-│   ├── crud/             # CRUD 操作 (数据库读写)
+│   ├── agents/
+│   │   ├── base/llm.py         # LLM 调用封装
+│   │   │
+│   │   ├── coordinator/        # Coordinator Agent
+│   │   │   ├── __init__.py
+│   │   │   ├── coordinator_node.py
+│   │   │   └── prompts.py
+│   │   │
+│   │   ├── sql/                # SQL Agent
+│   │   │   ├── __init__.py
+│   │   │   ├── sql_generation_node.py
+│   │   │   └── sql_execution_node.py
+│   │   │
+│   │   ├── critic/              # Critic Agent
+│   │   │   ├── __init__.py
+│   │   │   ├── critic_node.py
+│   │   │   └── prompts.py
+│   │   │
+│   │   ├── rag/                # RAG Agent (待完善)
+│   │   │   ├── __init__.py
+│   │   │   ├── rag_retrieval_node.py
+│   │   │   └── prompts.py
+│   │   │
+│   │   └── memory/              # Session 记忆系统
+│   │       ├── __init__.py
+│   │       └── session_memory.py
 │   │
-│   ├── services/         # 业务逻辑层
+│   ├── tools/                   # 工具层
+│   │   ├── sql_generator.py    # SQL 生成器
+│   │   ├── sql_validator.py    # SQL 安全校验
+│   │   ├── sql_executor.py     # SQL 执行器
+│   │   └── schema_loader.py    # Schema + 同义词映射
 │   │
-│   ├── core/             # 核心配置 (config.py)
+│   ├── db/                      # 数据库层
+│   │   ├── connection.py      # 连接池管理
+│   │   └── schema.py           # 表结构定义
 │   │
-│   ├── db/               # 数据库配置 (engine, session)
-│   │
-│   └── main.py           # FastAPI 应用入口
+│   └── core/
+│       └── config.py           # 配置管理
 │
-├── scripts/
-│   ├── import_data.py    # JSON 数据导入脚本
-│   └── init_db.sql       # MySQL 建表 SQL
-│
-├── data/                 # JSON 示例数据
+├── data/                        # JSON 示例数据
 │   ├── documents.json
 │   ├── inspection_items.json
 │   └── document_changes.json
 │
-├── alembic/              # 数据库迁移
+├── scripts/
+│   └── import_data.py          # 数据导入脚本
 │
-├── requirements.txt      # Python 依赖
-└── .env                  # 环境变量配置
+├── alembic/                     # 数据库迁移
+│
+├── requirements.txt             # 依赖
+├── alembic.ini                 # Alembic 配置
+└── .env                        # 环境变量
 ```
 
 ---
 
-## 数据库设计
+## AgentState 定义
 
-### 三张核心表的关系
+```python
+class AgentState(TypedDict):
+    # 用户输入
+    question: str
+    session_id: str
 
+    # 意图分发
+    intent: QueryIntent  # DATABASE_QUERY / DOCUMENT_SEARCH / MIXED
+    use_sql: bool
+    use_rag: bool
+
+    # SQL 工作流
+    generated_sql: Optional[str]
+    sql_result: Optional[dict]
+    sql_is_valid: bool
+
+    # RAG 工作流
+    retrieved_docs: Optional[list]
+    rag_result: Optional[str]
+
+    # Critic 反馈
+    critic_feedback: Optional[str]
+    needs_regeneration: bool
+
+    # 记忆系统
+    session_history: Annotated[list[dict], add_messages]
+
+    # 工作流控制
+    current_step: WorkflowStep
+    retry_count: int
+    max_retries: int
 ```
-documents ────────────── inspection_items
-(SIP主表) 1 ─── N        (检验项目明细)
-          │
-          └─── N document_changes
-               (版本变更记录)
-```
-
-### 表1: documents (SIP 主表)
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INT | 主键 |
-| document_id | VARCHAR(100) | 文档编号 **【唯一】** |
-| customer | VARCHAR(100) | 客户名称 |
-| project | VARCHAR(100) | 项目名称 |
-| part_num | VARCHAR(100) | 零件号 |
-| part_name | VARCHAR(200) | 零件名称 |
-| document_type | VARCHAR(50) | 文档类型 (SIP/SOP) |
-| version | VARCHAR(20) | 版本号 |
-| drawing_version | VARCHAR(20) | 图纸版本 |
-| mold_num | VARCHAR(100) | 模具编号 |
-| prepared_date | DATE | 编制日期 |
-| status | VARCHAR(20) | 状态 (active/inactive) |
-
-### 表2: inspection_items (检验项目表)
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INT | 主键 |
-| item_id | VARCHAR(50) | 项目编号 **【唯一】** |
-| document_id | VARCHAR(100) | 外键 → documents |
-| inspection_item | VARCHAR(500) | 检验项目名称 |
-| requirements | JSON | 检验要求列表 |
-| inspection_method | JSON | 检验方法列表 |
-| sampling_plan | JSON | 抽样计划 (AQL, 检验水平) |
-| characteristic_level | VARCHAR(10) | 特性等级 (A/B/C) |
-| chunk_text | TEXT | 合并文本 (RAG用) |
-
-### 表3: document_changes (变更记录表)
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INT | 主键 |
-| change_id | VARCHAR(50) | 变更编号 **【唯一】** |
-| document_id | VARCHAR(100) | 外键 → documents |
-| version | VARCHAR(20) | 版本号 |
-| change_date | DATE | 变更日期 |
-| change_content | VARCHAR(1000) | 变更内容 |
 
 ---
 
-## 快速开始
+## 数据库表结构
 
-### 1. 安装依赖
+### 三张核心表
 
-```bash
-cd PQM
-pip install -r requirements.txt
-```
+| 表名 | 说明 | 关联 |
+|------|------|------|
+| documents | SIP 主表 | 1 |
+| inspection_items | 检验项目表 | N→1 documents |
+| document_changes | 版本变更记录表 | N→1 documents |
 
-### 2. 配置数据库
+### 关键字段
 
-编辑 `.env` 文件：
+**documents:**
+- `document_id` — 文档编号【唯一】
+- `customer` — 客户名称 (比亚迪/特斯拉)
+- `project` — 项目名称
+- `part_num` / `part_name` — 零件号/名称
+- `version` — 版本号
 
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=123456
-DB_NAME=pqm_db
-```
+**inspection_items:**
+- `item_id` — 项目编号【唯一】
+- `document_id` — 外键 → documents
+- `inspection_item` — 检验项目名称
+- `requirements` — 检验要求 (JSON)
+- `inspection_method` — 检验方法 (JSON)
+- `sampling_plan` — 抽样计划 (JSON, 含 AQL)
+- `characteristic_level` — 特性等级 (A/B/C)
 
-### 3. 创建数据库
-
-```sql
--- 登录 MySQL
-mysql -u root -p
-
--- 执行建表
-source scripts/init_db.sql
-```
-
-### 4. 导入示例数据
-
-```bash
-python scripts/import_data.py
-```
-
-### 5. 启动服务
-
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### 6. 访问 API 文档
-
-- Swagger UI: http://localhost:8000/api/v1/docs
-- ReDoc: http://localhost:8000/api/v1/redoc
+**document_changes:**
+- `change_id` — 变更编号【唯一】
+- `document_id` — 外键 → documents
+- `version` — 版本号
+- `change_date` — 变更日期
+- `change_content` — 变更内容
 
 ---
 
 ## API 接口
 
-### 文档管理
+### Agent 查询
 
 ```
-GET    /api/v1/documents                    # 获取文档列表 (分页、过滤)
-GET    /api/v1/documents/{document_id}      # 获取单个文档
-POST   /api/v1/documents                    # 创建文档
-PUT    /api/v1/documents/{document_id}      # 更新文档
-DELETE /api/v1/documents/{document_id}      # 删除文档
+POST /api/v1/agent/query
+{
+  "question": "前横梁的硬度标准是什么？",
+  "session_id": "user-001"
+}
+
+响应:
+{
+  "success": true,
+  "question": "前横梁的硬度标准是什么？",
+  "intent": "database_query",
+  "sql": "SELECT ... FROM inspection_items ...",
+  "data": [...],
+  "count": 2,
+  "error": null
+}
 ```
 
-### 检验项目管理
+### 对话历史
 
 ```
-GET    /api/v1/inspection-items                         # 获取检验项目列表
-GET    /api/v1/inspection-items/{item_id}              # 获取单个检验项目
-GET    /api/v1/inspection-items/by-document/{doc_id}   # 获取某文档的所有检验项目
-GET    /api/v1/inspection-items/search/text?keyword=   # 全文搜索
-POST   /api/v1/inspection-items                         # 创建检验项目
-PUT    /api/v1/inspection-items/{item_id}              # 更新检验项目
-DELETE /api/v1/inspection-items/{item_id}              # 删除检验项目
+GET /api/v1/agent/history?session_id=user-001
 ```
 
-### 变更记录管理
+### 健康检查
 
 ```
-GET    /api/v1/document-changes                     # 获取变更记录列表
-GET    /api/v1/document-changes/{change_id}         # 获取单个变更记录
-GET    /api/v1/document-changes/by-document/{doc_id} # 获取某文档的所有变更记录
-POST   /api/v1/document-changes                     # 创建变更记录
-PUT    /api/v1/document-changes/{change_id}         # 更新变更记录
-DELETE /api/v1/document-changes/{change_id}         # 删除变更记录
+GET /api/v1/agent/health
 ```
 
 ---
 
-## Text2SQL 查询示例
+## 使用示例
 
-Agent 可以将自然语言转换为 SQL 查询：
+### 1. 启动服务
 
-| 自然语言 | SQL 查询 |
-|----------|----------|
-| "前横梁的硬度标准是什么？" | SELECT requirements FROM inspection_items WHERE document_id = 'VHST-SIP-SA2HG-014' AND inspection_item LIKE '%硬度%' |
-| "哪些项目的AQL是0.65？" | SELECT * FROM inspection_items WHERE JSON_EXTRACT(sampling_plan, '$.aql') = '0.65' |
-| "比亚迪项目有哪些SIP？" | SELECT * FROM documents WHERE customer = '比亚迪' AND document_type = 'SIP' |
-| "找出所有A级特性的检验项目" | SELECT * FROM inspection_items WHERE characteristic_level = 'A' |
+```bash
+cd PQM
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 2. 调用查询
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/agent/query" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "比亚迪项目的SIP有哪些？", "session_id": "test-001"}'
+```
+
+### 3. 多轮对话
+
+```bash
+# 第一轮
+curl -X POST "http://localhost:8000/api/v1/agent/query" \
+  -d '{"question": "前横梁的硬度标准是什么？", "session_id": "user-001"}'
+
+# 第二轮 (携带历史记忆)
+curl -X POST "http://localhost:8000/api/v1/agent/query" \
+  -d '{"question": "那外观检验的标准呢？", "session_id": "user-001"}'
+```
 
 ---
 
 ## 配置说明
 
-### 应用配置 (app/core/config.py)
+### 环境变量 (.env)
 
-| 配置项 | 默认值 | 说明 |
-|--------|--------|------|
-| APP_NAME | 质量检验知识库 | 应用名称 |
-| APP_VERSION | 1.0.0 | 版本号 |
-| API_PREFIX | /api/v1 | API 路径前缀 |
-| DEBUG | False | 调试模式 |
+```env
+# 应用配置
+APP_NAME=质量检验知识库
+APP_VERSION=1.0.0
+DEBUG=false
+API_PREFIX=/api/v1
 
-### 数据库配置
+# 数据库配置
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=123456
+DB_NAME=pqm_db
 
-| 配置项 | 默认值 | 说明 |
-|--------|--------|------|
-| DB_HOST | localhost | 数据库主机 |
-| DB_PORT | 3306 | 数据库端口 |
-| DB_USER | root | 数据库用户 |
-| DB_PASSWORD | 123456 | 数据库密码 |
-| DB_NAME | pqm_db | 数据库名称 |
-| DB_POOL_SIZE | 10 | 连接池大小 |
-| DB_MAX_OVERFLOW | 20 | 最大溢出连接数 |
+# LLM 配置
+LLM_PROVIDER=anthropic
+LLM_API_KEY=your-api-key
+LLM_BASE_URL=https://api.minimaxi.com/anthropic
+LLM_MODEL=MiniMax-M2.7
+LLM_MAX_TOKENS=4096
+LLM_TEMPERATURE=0.7
+```
 
 ---
 
-## License
+## 依赖
 
-MIT#   P Q M _ A G E N T  
- 
+```
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+sqlalchemy>=2.0.25
+aiomysql>=0.2.0
+pymysql>=1.1.0
+pydantic>=2.6.0
+pydantic-settings>=2.1.0
+alembic>=1.13.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+langgraph>=0.2.0
+langchain-anthropic
+```
+
+---
+
+## 后续扩展
+
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| Text2SQL | ✅ 已完成 | LangGraph 多 Agent |
+| 意图识别 | ✅ 已完成 | LLM 驱动 |
+| Critic 审查 | ✅ 已完成 | 三层验证 + 重试 |
+| Session 记忆 | ✅ 已完成 | 内存存储 |
+| RAG 检索 | ⏳ 规划中 | 向量 + 全文搜索 |
+| 持久化记忆 | ⏳ 规划中 | SQLite/Redis |
+
+---
+
+*文档生成时间: 2026-05-12*
