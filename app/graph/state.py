@@ -81,6 +81,7 @@ class AgentState(TypedDict):
     retry_count: int
     max_retries: int
     error: Optional[str]
+    retry_exhausted: bool  # 新增：标记重试是否已耗尽
 
 
 def create_initial_state(
@@ -118,4 +119,5 @@ def create_initial_state(
         retry_count=0,
         max_retries=max_retries,
         error=None,
+        retry_exhausted=False,
     )

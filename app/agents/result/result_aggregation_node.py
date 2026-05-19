@@ -75,6 +75,8 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
         sql_error=sql_error,
         rag_result=rag_result,
         critic_feedback=critic_feedback,
+        retry_exhausted=state.get("retry_exhausted", False),
+        max_retries=state.get("max_retries", 2),
     )
 
     # 记录到记忆系统
@@ -92,6 +94,8 @@ def _generate_final_response(
     sql_error: Optional[str],
     rag_result: Optional[str],
     critic_feedback: Optional[str],
+    retry_exhausted: bool = False,
+    max_retries: int = 2,
 ) -> str:
     """
     生成最终回复
@@ -137,5 +141,9 @@ def _generate_final_response(
     if rag_result and rag_result != "RAG 功能待完善":
         return rag_result
 
-    # 情况4: 全部失败
+    # 情况4: 重试耗尽
+    if retry_exhausted:
+        return f"抱歉，经过 {max_retries} 次尝试后仍无法生成有效的 SQL。\n\nCritic 反馈：{critic_feedback or 'SQL 审查未通过'}"
+
+    # 情况5: 全部失败
     return "抱歉，无法回答您的问题。请尝试重新描述您的问题。"

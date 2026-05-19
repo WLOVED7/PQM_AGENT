@@ -116,6 +116,8 @@ def create_pqm_graph() -> StateGraph:
             if state["retry_count"] < state["max_retries"]:
                 return "sql_generation"  # 重新生成
             else:
+                # 重试耗尽，标记并返回错误
+                state["retry_exhausted"] = True
                 return "result_aggregation"  # 放弃
         else:
             return "result_aggregation"

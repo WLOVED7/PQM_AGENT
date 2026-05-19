@@ -129,4 +129,5 @@ async def sql_generation_node(state: AgentState) -> AgentState:
         **state,
         "generated_sql": sql,
         "current_step": WorkflowStep.SQL_GENERATION,
+        "retry_count": state.get("retry_count", 0) + 1,  # 重试时递增
     }

@@ -4,16 +4,21 @@ Base LLM Module - 基于 LangChain 的 LLM 调用接口
 import os
 from typing import Optional, Literal, Any
 
+from dotenv import load_dotenv
+
+# 加载 .env 文件
+load_dotenv()
+
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 
 class LLMConfig:
     """LLM 配置"""
-    provider: Literal["anthropic"] = "anthropic"
-    auth_token: str = os.getenv("ANTHROPIC_AUTH_TOKEN", "")
-    base_url: str = os.getenv("ANTHROPIC_BASE_URL", "https://api.minimaxi.com/anthropic")
-    model: str = os.getenv("ANTHROPIC_MODEL", "MiniMax-M2.7")
+    provider: Literal["minimax"] = "minimax"
+    auth_token: str = os.getenv("MiniMax_API_KEY", "")
+    base_url: str = os.getenv("MiniMax_BASE_URL", "https://api.minimaxi.com/anthropic")
+    model: str = os.getenv("MiniMax_MODEL", "MiniMax-M2.7")
     max_tokens: int = 4096
     temperature: float = 0.7
 
@@ -95,9 +100,20 @@ class BaseLLM:
         return response.content
 
     def invoke(self, messages: list[Any]) -> str:
-        """直接调用 LLM（用于 LangGraph）"""
+        """直接调用 LLM（用于 LangGraph），返回文本内容"""
         response = self.llm.invoke(messages)
-        return response.content
+
+        # 获取 content
+        content = response.content if hasattr(response, 'content') else str(response)
+
+        # MiniMax 返回 list 格式: [{'type': 'text', 'text': '...'}, ...]
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and item.get("type") == "text":
+                    return item.get("text", "")
+            return ""
+
+        return str(content)
 
 
 def get_llm(config: Optional[LLMConfig] = None) -> BaseLLM:
@@ -105,13 +121,8 @@ def get_llm(config: Optional[LLMConfig] = None) -> BaseLLM:
     return BaseLLM(config)
 
 
-def create_chat_llm() -> ChatAnthropic:
-    """创建 LangChain ChatAnthropic 实例（用于 LangGraph）"""
-    config = LLMConfig()
-    return ChatAnthropic(
-        model=config.model,
-        anthropic_api_key=config.auth_token,
-        base_url=config.base_url,
-        max_tokens=config.max_tokens,
-        temperature=config.temperature,
-    )
+def create_chat_llm() -> BaseLLM:
+    """创建 LangChain LLM 实例（用于 LangGraph）"""
+    return BaseLLM()
+
+
