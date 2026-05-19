@@ -29,8 +29,9 @@ class QueryIntent(str, Enum):
 class WorkflowStep(str, Enum):
     """工作流步骤枚举"""
     COORDINATOR = "coordinator"
-    SQL_AGENT = "sql_agent"
+    SQL_GENERATION = "sql_generation"
     CRITIC_REVIEW = "critic_review"
+    SQL_EXECUTION = "sql_execution"
     RAG_RETRIEVAL = "rag_retrieval"
     RESULT_AGGREGATION = "result_aggregation"
 

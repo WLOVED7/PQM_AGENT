@@ -8,24 +8,26 @@ PQM LangGraph 主图 (graph/pqm_graph.py)
 
 【节点】
 - coordinator: 意图识别
-- sql_generation: SQL 生成
+- sql_generation: SQL 生成 (Agent)
 - critic: SQL 审查
-- sql_execution: SQL 执行
+- sql_execution: SQL 执行 (Tool)
 - rag_retrieval: RAG 检索
 - result_aggregation: 结果汇总
 
 【边路由逻辑】
-- coordinator → sql_agent (use_sql=True)
+- coordinator → sql_generation (use_sql=True)
 - coordinator → rag_retrieval (use_rag=True & not use_sql)
 - coordinator → result_aggregation (unknown intent)
-- sql_agent → critic
-- critic → result_aggregation (sql_is_valid=True or retry exhausted)
-- critic → sql_agent (needs_regeneration & retry_count < max)
+- sql_generation → critic
+- critic → sql_execution (sql_is_valid=True)
+- critic → sql_generation (needs_regeneration & retry_count < max)
+- critic → result_aggregation (retry exhausted)
+- sql_execution → result_aggregation
 - rag_retrieval → result_aggregation
 
 【Critic 重试循环】
                     ┌─────────────────┐
-                    │   sql_agent     │
+                    │ sql_generation  │ (Agent)
                     └────────┬────────┘
                              │
                     ┌────────▼────────┐
@@ -38,24 +40,25 @@ PQM LangGraph 主图 (graph/pqm_graph.py)
               │                             │
               ▼                             ▼
     ┌─────────────────┐      ┌─────────────────────────┐
-    │result_aggregation│      │ retry_count < max_retries│
-    └─────────────────┘      └────────────┬──────────────┘
-                                           │
-                              ┌────────────┴────────────┐
-                              │                         │
-                           Yes                          No
-                              │                         │
-                              ▼                         ▼
-                    ┌─────────────────┐      ┌─────────────────────┐
-                    │   sql_agent     │      │result_aggregation  │
-                    │(retry + 1)     │      │  (return error)     │
-                    └─────────────────┘      └─────────────────────┘
+    │ sql_execution   │      │ retry_count < max_retries│
+    │   (Tool)        │      └────────────┬──────────────┘
+    └────────┬────────┘                   │
+             │                   ┌─────────┴─────────┐
+             │                   │                   │
+             │                  Yes                   No
+             │                   │                   │
+             ▼                   ▼                   ▼
+    ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐
+    │result_aggregation│  │sql_generation   │  │result_aggregation  │
+    └─────────────────┘  │(retry + 1)     │  │  (return error)     │
+                         └─────────────────┘  └─────────────────────┘
 """
 from langgraph.graph import StateGraph, END
 
 from app.graph.state import AgentState, WorkflowStep
 from app.agents.coordinator.coordinator_node import coordinator_node
-from app.agents.sql.sql_agent_node import sql_agent_node
+from app.agents.sql.sql_generation_node import sql_generation_node
+from app.agents.sql.sql_execution_node import sql_execution_node
 from app.agents.critic.critic_node import critic_node
 from app.agents.rag.rag_retrieval_node import rag_retrieval_node
 from app.agents.result.result_aggregation_node import result_aggregation_node
@@ -67,8 +70,9 @@ def create_pqm_graph() -> StateGraph:
 
     节点:
     - coordinator: 意图识别
-    - sql_agent: SQL 生成 + 执行
+    - sql_generation: SQL 生成 (Agent)
     - critic: SQL 审查
+    - sql_execution: SQL 执行 (Tool)
     - rag_retrieval: RAG 检索
     - result_aggregation: 结果汇总
 
@@ -80,8 +84,9 @@ def create_pqm_graph() -> StateGraph:
 
     # ===== 注册节点 =====
     graph.add_node("coordinator", coordinator_node)
-    graph.add_node("sql_agent", sql_agent_node)
+    graph.add_node("sql_generation", sql_generation_node)
     graph.add_node("critic", critic_node)
+    graph.add_node("sql_execution", sql_execution_node)
     graph.add_node("rag_retrieval", rag_retrieval_node)
     graph.add_node("result_aggregation", result_aggregation_node)
 
@@ -94,9 +99,9 @@ def create_pqm_graph() -> StateGraph:
         """Coordinator 之后的路由"""
         if state["use_sql"] and state["use_rag"]:
             # MIXED 模式: 先走 SQL 路径（简化处理）
-            return "sql_agent"
+            return "sql_generation"
         elif state["use_sql"]:
-            return "sql_agent"
+            return "sql_generation"
         elif state["use_rag"]:
             return "rag_retrieval"
         else:
@@ -105,11 +110,11 @@ def create_pqm_graph() -> StateGraph:
     def route_after_critic(state: AgentState) -> str:
         """Critic 之后的路由"""
         if state["sql_is_valid"]:
-            return "result_aggregation"
+            return "sql_execution"
         elif state["needs_regeneration"]:
             # 检查重试次数
             if state["retry_count"] < state["max_retries"]:
-                return "sql_agent"  # 重新生成
+                return "sql_generation"  # 重新生成
             else:
                 return "result_aggregation"  # 放弃
         else:
@@ -122,23 +127,26 @@ def create_pqm_graph() -> StateGraph:
         "coordinator",
         route_after_coordinator,
         {
-            "sql_agent": "sql_agent",
+            "sql_generation": "sql_generation",
             "rag_retrieval": "rag_retrieval",
             "result_aggregation": "result_aggregation",
         }
     )
 
-    # SQL 流程: sql_agent → critic → result_aggregation
-    graph.add_edge("sql_agent", "critic")
+    # SQL 流程: sql_generation → critic → sql_execution → result_aggregation
+    graph.add_edge("sql_generation", "critic")
 
     graph.add_conditional_edges(
         "critic",
         route_after_critic,
         {
+            "sql_execution": "sql_execution",
+            "sql_generation": "sql_generation",
             "result_aggregation": "result_aggregation",
-            "sql_agent": "sql_agent",
         }
     )
+
+    graph.add_edge("sql_execution", "result_aggregation")
 
     # RAG 流程
     graph.add_edge("rag_retrieval", "result_aggregation")
