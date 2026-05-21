@@ -25,8 +25,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
-from app.graph.pqm_graph import run_pqm_graph
-from app.agents.memory.session_memory import session_memory
+from app.core.pqm_graph import run_pqm_graph
+from app.memory.short_term_memory import session_memory
 
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
@@ -48,7 +48,7 @@ class QueryResponse(BaseModel):
     question: str
     session_id: str
     intent: str
-    sql: Optional[str] = None
+    sql: Optional[str] = Field(...,description="gen_sql",examples=True)
     data: Optional[List[Dict[str, Any]]] = None
     count: int = 0
     error: Optional[str] = None
@@ -112,7 +112,7 @@ async def query(request: QueryRequest):
             data=sql_result.get("data") if sql_result else None,
             count=sql_result.get("count", 0) if sql_result else 0,
             error=sql_error,
-            answer=_build_answer(result),
+            answer=result.get("final_response") or _build_answer(result),
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -197,7 +197,7 @@ async def health_check():
     Returns:
         HealthResponse，服务状态
     """
-    from app.graph import pqm_graph
+    from app.core import pqm_graph
 
     return HealthResponse(
         status="healthy",

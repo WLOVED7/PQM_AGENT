@@ -19,8 +19,8 @@ from typing import Dict, Any, Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
-from app.graph.state import AgentState, WorkflowStep
-from app.agents.memory.session_memory import session_memory
+from app.state.state import AgentState, WorkflowStep
+from app.memory.short_term_memory import session_memory
 
 
 AGGREGATION_PROMPT = """你是质量检验知识库的回复聚合专家。
@@ -82,8 +82,10 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     # 记录到记忆系统
     session_memory.add_message(session_id, "assistant", final_response)
 
+    # 存储原始回复供后续优化（留空，由 response_optimization_node 处理）
     return {
         **state,
+        "raw_response": final_response,  # 原始回复，response_optimization 会进一步处理
         "current_step": WorkflowStep.RESULT_AGGREGATION,
     }
 

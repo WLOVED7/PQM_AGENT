@@ -9,7 +9,7 @@ Agents Module - 多 Agent 系统架构
     ├── sql/               # SQL Agent (生成 + 执行)
     ├── critic/            # Critic Agent (SQL 审查)
     ├── rag/               # RAG Agent (文档检索)
-    ├── memory/            # Session 记忆系统
+    ├── memory/            # Session 记忆系统 (已移至 app/memory/)
     └── result/            # 结果汇总
 
 【多 Agent 架构说明】
@@ -17,10 +17,10 @@ Agents Module - 多 Agent 系统架构
 - SQL Agent: 生成和执行 SQL 查询
 - Critic: 审查 SQL 正确性，支持重试
 - RAG: 文档检索（待完善）
-- Memory: Session 级记忆存储
+- Memory: Session 级记忆存储 (现已移至 app.memory)
 
 使用示例:
-    from app.graph import run_pqm_graph
+    from app.core.pqm_graph import run_pqm_graph
     result = await run_pqm_graph("前横梁硬度标准是多少？", session_id="user-001")
 
     from app.agents.memory import session_memory
@@ -29,7 +29,7 @@ Agents Module - 多 Agent 系统架构
 from app.agents.base import BaseLLM, LLMConfig, get_llm
 
 # 导入子模块
-from app.agents.memory import session_memory, SessionMemory
+from app.memory import session_memory, SessionMemory
 
 __all__ = [
     # Base

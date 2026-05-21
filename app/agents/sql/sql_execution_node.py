@@ -15,7 +15,7 @@ generated_sql (已审查) → 执行 SQL → sql_result / sql_error
 【重要】
 此节点在 critic 审查通过后才被执行，确保 SQL 安全有效后才执行。
 """
-from app.graph.state import AgentState, WorkflowStep
+from app.state.state import AgentState, WorkflowStep
 from app.tools.sql_validator import SQLValidator, SQLValidationError
 from app.db.connection import fetch_all
 
@@ -77,6 +77,7 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         result["count"] = len(data)
     except Exception as e:
         result["error"] = f"SQL 执行失败: {str(e)}"
+        result["success"] = False
 
     return {
         **state,
@@ -84,3 +85,7 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         "sql_error": result.get("error"),
         "current_step": WorkflowStep.SQL_EXECUTION,
     }
+
+
+if __name__ == "__main__":
+    pass

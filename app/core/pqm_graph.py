@@ -1,6 +1,6 @@
 """
 =============================================================================
-PQM LangGraph 主图 (graph/pqm_graph.py)
+PQM LangGraph 主图 (core/pqm_graph.py)
 =============================================================================
 
 【核心功能】
@@ -13,6 +13,7 @@ PQM LangGraph 主图 (graph/pqm_graph.py)
 - sql_execution: SQL 执行 (Tool)
 - rag_retrieval: RAG 检索
 - result_aggregation: 结果汇总
+- response_optimization: LLM 优化输出
 
 【边路由逻辑】
 - coordinator → sql_generation (use_sql=True)
@@ -24,6 +25,8 @@ PQM LangGraph 主图 (graph/pqm_graph.py)
 - critic → result_aggregation (retry exhausted)
 - sql_execution → result_aggregation
 - rag_retrieval → result_aggregation
+- result_aggregation → response_optimization
+- response_optimization → END
 
 【Critic 重试循环】
                     ┌─────────────────┐
@@ -55,13 +58,14 @@ PQM LangGraph 主图 (graph/pqm_graph.py)
 """
 from langgraph.graph import StateGraph, END
 
-from app.graph.state import AgentState, WorkflowStep
+from app.state.state import AgentState, WorkflowStep
 from app.agents.coordinator.coordinator_node import coordinator_node
 from app.agents.sql.sql_generation_node import sql_generation_node
 from app.agents.sql.sql_execution_node import sql_execution_node
 from app.agents.critic.critic_node import critic_node
 from app.agents.rag.rag_retrieval_node import rag_retrieval_node
 from app.agents.result.result_aggregation_node import result_aggregation_node
+from app.agents.result.response_optimization_node import response_optimization_node
 
 
 def create_pqm_graph() -> StateGraph:
@@ -89,6 +93,7 @@ def create_pqm_graph() -> StateGraph:
     graph.add_node("sql_execution", sql_execution_node)
     graph.add_node("rag_retrieval", rag_retrieval_node)
     graph.add_node("result_aggregation", result_aggregation_node)
+    graph.add_node("response_optimization", response_optimization_node)
 
     # ===== 设置入口点 =====
     graph.set_entry_point("coordinator")
@@ -154,7 +159,10 @@ def create_pqm_graph() -> StateGraph:
     graph.add_edge("rag_retrieval", "result_aggregation")
 
     # 结束
-    graph.add_edge("result_aggregation", END)
+    graph.add_edge("result_aggregation", "response_optimization")
+
+    # 结束
+    graph.add_edge("response_optimization", END)
 
     return graph.compile()
 
@@ -174,7 +182,7 @@ async def run_pqm_graph(question: str, session_id: str) -> AgentState:
     Returns:
         最终状态
     """
-    from app.graph.state import create_initial_state
+    from app.state.state import create_initial_state
 
     initial_state = create_initial_state(
         question=question,

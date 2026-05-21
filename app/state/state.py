@@ -1,6 +1,6 @@
 """
 =============================================================================
-LangGraph State 定义 (graph/state.py)
+LangGraph State 定义 (state/state.py)
 =============================================================================
 
 【用途】
@@ -34,6 +34,7 @@ class WorkflowStep(str, Enum):
     SQL_EXECUTION = "sql_execution"
     RAG_RETRIEVAL = "rag_retrieval"
     RESULT_AGGREGATION = "result_aggregation"
+    RESPONSE_OPTIMIZATION = "response_optimization"
 
 
 class AgentState(TypedDict):
@@ -81,7 +82,9 @@ class AgentState(TypedDict):
     retry_count: int
     max_retries: int
     error: Optional[str]
-    retry_exhausted: bool  # 新增：标记重试是否已耗尽
+    retry_exhausted: bool
+    raw_response: Optional[str]  # result_aggregation 生成的原始回复
+    final_response: Optional[str]  # LLM优化后的最终回复
 
 
 def create_initial_state(

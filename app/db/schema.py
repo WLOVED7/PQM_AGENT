@@ -253,3 +253,7 @@ def get_table_schema(table_name: str) -> dict:
 def get_all_tables() -> list:
     """获取所有表名"""
     return list(ALL_SCHEMAS.keys())
+
+if __name__ == "__main__":
+    print(get_table_schema('documents'))
+    

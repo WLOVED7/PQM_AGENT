@@ -1,6 +1,6 @@
 """
 =============================================================================
-Session Memory - Session 级记忆系统 (agents/memory/session_memory.py)
+Session Memory - Session 级记忆系统 (memory/short_term_memory.py)
 =============================================================================
 
 【核心功能】

@@ -25,7 +25,7 @@ from typing import Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
-from app.graph.state import AgentState, WorkflowStep
+from app.state.state import AgentState, WorkflowStep
 from app.tools.sql_validator import SQLValidator, SQLValidationError
 from app.tools.schema_loader import schema_loader
 

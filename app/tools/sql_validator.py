@@ -23,6 +23,10 @@ SQL 安全校验器 (tools/sql_validator.py)
 所以需要双重保护：参数化 + 语法校验。
 """
 
+
+'''
+用于正则表达式匹配。常用来验证 SQL 语法、提取关键词、过滤危险字符等
+'''
 import re
 from typing import Tuple, Optional
 
@@ -182,3 +186,9 @@ class SQLValidator:
 
 # 全局实例
 sql_validator = SQLValidator()
+
+
+# sql_validator验证
+if __name__ == "__main__":
+    result = sql_validator.validate("SELECT * FROM documents LIMIT 10")
+    print("结果:",result)

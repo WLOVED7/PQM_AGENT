@@ -20,8 +20,9 @@ question → LLM 生成 SQL → 返回 generated_sql
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
-from app.graph.state import AgentState, WorkflowStep
+from app.state.state import AgentState, WorkflowStep
 from app.tools.schema_loader import schema_loader
+from app.memory.short_term_memory import session_memory
 
 
 # =============================================================================
@@ -89,7 +90,6 @@ async def sql_generation_node(state: AgentState) -> AgentState:
     session_id = state["session_id"]
 
     # 获取对话历史上下文
-    from app.agents.memory.session_memory import session_memory
     history_context = session_memory.get_context_for_llm(session_id, limit=3)
 
     # 构建 Schema 上下文
@@ -124,6 +124,7 @@ async def sql_generation_node(state: AgentState) -> AgentState:
             "error": "无法为该问题生成有效的 SQL",
             "current_step": WorkflowStep.SQL_GENERATION,
         }
+
 
     return {
         **state,

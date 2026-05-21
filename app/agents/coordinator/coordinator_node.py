@@ -16,8 +16,8 @@ from typing import Literal
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
-from app.graph.state import AgentState, QueryIntent, WorkflowStep
-from app.agents.memory.session_memory import session_memory
+from app.state.state import AgentState, QueryIntent, WorkflowStep
+from app.memory.short_term_memory import session_memory
 
 
 COORDINATOR_PROMPT = """你是 PQM 质量检验知识库的 Coordinator Agent。

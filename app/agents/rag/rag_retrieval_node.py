@@ -22,8 +22,8 @@ from typing import Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
-from app.graph.state import AgentState, WorkflowStep
-from app.agents.memory.session_memory import session_memory
+from app.state.state import AgentState, WorkflowStep
+from app.memory.short_term_memory import session_memory
 
 
 RAG_PROMPT = """你是质量检验知识库的文档检索专家。
