@@ -48,7 +48,7 @@ class QueryResponse(BaseModel):
     question: str
     session_id: str
     intent: str
-    sql: Optional[str] = Field(...,description="gen_sql",examples=True)
+    sql: Optional[str] = Field(...,description="gen_sql",examples=""SELECT * FROM documents"")
     data: Optional[List[Dict[str, Any]]] = None
     count: int = 0
     error: Optional[str] = None
