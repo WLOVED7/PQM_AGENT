@@ -21,6 +21,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from app.agents.base.llm import create_chat_llm
 from app.state.state import AgentState, WorkflowStep
 from app.memory.short_term_memory import session_memory
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 AGGREGATION_PROMPT = """你是质量检验知识库的回复聚合专家。
@@ -61,6 +64,8 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含最终回复（通过 session_history 传递）
     """
+    logger.info("Result Aggregation 开始汇总结果")
+
     question = state["question"]
     sql_result = state.get("sql_result")
     sql_error = state.get("sql_error")
@@ -68,7 +73,20 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     critic_feedback = state.get("critic_feedback")
     session_id = state["session_id"]
 
+    # 记录各状态信息
+    if sql_result:
+        logger.info(f"SQL result: success={sql_result.get('success')}, count={sql_result.get('count', 0)}")
+    else:
+        logger.info("SQL result: None")
+    if sql_error:
+        logger.warning(f"SQL error: {sql_error}")
+    if rag_result:
+        logger.info(f"RAG result: {rag_result[:50]}...")
+    if critic_feedback:
+        logger.info(f"Critic feedback: {critic_feedback}")
+
     # 生成最终回复
+    logger.debug("调用 _generate_final_response 生成回复...")
     final_response = _generate_final_response(
         question=question,
         sql_result=sql_result,
@@ -78,9 +96,11 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
         retry_exhausted=state.get("retry_exhausted", False),
         max_retries=state.get("max_retries", 2),
     )
+    logger.debug(f"生成的回复长度: {len(final_response)} 字符")
 
     # 记录到记忆系统
     session_memory.add_message(session_id, "assistant", final_response)
+    logger.info("Result Aggregation 完成，回复已记录到记忆系统")
 
     # 存储原始回复供后续优化（留空，由 response_optimization_node 处理）
     return {

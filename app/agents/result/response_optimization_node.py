@@ -21,6 +21,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
 from app.state.state import AgentState, WorkflowStep
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 OPTIMIZATION_PROMPT = """你是质量检验知识库的回复优化专家。
@@ -61,6 +64,8 @@ async def response_optimization_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含 final_response
     """
+    logger.info("Response Optimization 开始优化回复")
+
     question = state["question"]
     sql_result = state.get("sql_result")
     rag_result = state.get("rag_result")
@@ -68,6 +73,7 @@ async def response_optimization_node(state: AgentState) -> AgentState:
     retry_exhausted = state.get("retry_exhausted", False)
 
     # 构建原始结果描述
+    logger.debug("构建原始结果描述...")
     raw_result = _build_raw_result_description(
         sql_result=sql_result,
         rag_result=rag_result,
@@ -77,6 +83,8 @@ async def response_optimization_node(state: AgentState) -> AgentState:
 
     # 如果原始结果已经是简洁的友好格式（无SQL数据，只有RAG或错误），直接返回
     if not sql_result or not sql_result.get("success"):
+        logger.info("跳过 LLM 优化，使用原始回复")
+        logger.debug(f"原始回复: {raw_result[:100]}...")
         return {
             **state,
             "final_response": raw_result,
@@ -84,6 +92,7 @@ async def response_optimization_node(state: AgentState) -> AgentState:
         }
 
     # 调用 LLM 优化（需转义 raw_result 中的花括号，防止 str.format() 误解析）
+    logger.debug("调用 LLM 优化回复...")
     llm = create_chat_llm()
     escaped_raw_result = raw_result.replace("{", "{{").replace("}", "}}")
     prompt = OPTIMIZATION_PROMPT.format(
@@ -98,6 +107,9 @@ async def response_optimization_node(state: AgentState) -> AgentState:
 
     optimized_response = llm.invoke(messages)
     optimized_response = optimized_response.strip() if optimized_response else raw_result
+
+    logger.info(f"Response Optimization 完成，优化后回复长度: {len(optimized_response)} 字符")
+    logger.debug(f"最终回复: {optimized_response[:100]}...")
 
     return {
         **state,

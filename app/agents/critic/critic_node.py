@@ -28,6 +28,9 @@ from app.agents.base.llm import create_chat_llm
 from app.state.state import AgentState, WorkflowStep
 from app.tools.sql_validator import SQLValidator, SQLValidationError
 from app.tools.schema_loader import schema_loader
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 CRITIC_PROMPT = """你是 SQL 质量审查专家，负责验证生成的 SQL 是否正确。
@@ -200,11 +203,13 @@ async def critic_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含 sql_is_valid, critic_feedback, needs_regeneration
     """
+    logger.info("Critic 开始审查 SQL")
     question = state["question"]
     generated_sql = state.get("generated_sql", "")
 
     # 如果没有 SQL，直接返回无效
     if not generated_sql:
+        logger.warning("Critic 审查终止：没有可审查的 SQL")
         return {
             **state,
             "sql_is_valid": False,
@@ -217,8 +222,10 @@ async def critic_node(state: AgentState) -> AgentState:
     validator = CriticValidator()
 
     # 第一层: 基础安全校验
+    logger.debug("第一层：基础安全校验")
     is_valid, error = validator.basic_security_check(generated_sql)
     if not is_valid:
+        logger.warning(f"第一层校验失败：{error}")
         return {
             **state,
             "sql_is_valid": False,
@@ -226,10 +233,13 @@ async def critic_node(state: AgentState) -> AgentState:
             "needs_regeneration": True,
             "current_step": WorkflowStep.CRITIC_REVIEW,
         }
+    logger.debug("第一层校验通过")
 
     # 第二层: Schema 引用校验
+    logger.debug("第二层：Schema 引用校验")
     is_valid, error = validator.schema_reference_check(generated_sql)
     if not is_valid:
+        logger.warning(f"第二层校验失败：{error}")
         return {
             **state,
             "sql_is_valid": False,
@@ -237,10 +247,16 @@ async def critic_node(state: AgentState) -> AgentState:
             "needs_regeneration": True,
             "current_step": WorkflowStep.CRITIC_REVIEW,
         }
+    logger.debug("第二层校验通过")
 
     # 第三层: LLM 语义校验
+    logger.debug("第三层：LLM 语义校验")
     schema_context = schema_loader.generate_schema_context()
     semantic_result = validator.semantic_check(question, generated_sql, schema_context)
+    logger.info(f"LLM 语义校验完成：is_valid={semantic_result['is_valid']}, needs_regeneration={semantic_result['needs_regeneration']}, feedback={semantic_result.get('feedback', '')}")
+
+    if not semantic_result["is_valid"]:
+        logger.warning(f"SQL 语义审查未通过：{semantic_result.get('feedback', '未知原因')}")
 
     return {
         **state,

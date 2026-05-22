@@ -24,6 +24,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from app.agents.base.llm import create_chat_llm
 from app.state.state import AgentState, WorkflowStep
 from app.memory.short_term_memory import session_memory
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 RAG_PROMPT = """你是质量检验知识库的文档检索专家。
@@ -58,6 +61,8 @@ async def rag_retrieval_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含 retrieved_docs 和 rag_result
     """
+    logger.info(f"RAG Retrieval 开始处理问题: {state['question'][:50]}...")
+
     llm = create_chat_llm()
     question = state["question"]
     session_id = state["session_id"]
@@ -74,8 +79,10 @@ async def rag_retrieval_node(state: AgentState) -> AgentState:
         messages.append(HumanMessage(content=f"【对话历史】\n{history_context}"))
 
     # 调用 LLM 生成答案（当前无实际文档检索）
+    logger.debug("调用 LLM 生成 RAG 答案...")
     answer = llm.invoke(messages)
     answer = answer.strip() if answer else ""
+    logger.info(f"RAG 检索完成，结果长度: {len(answer)} 字符")
 
     return {
         **state,

@@ -23,6 +23,9 @@ from app.agents.base.llm import create_chat_llm
 from app.state.state import AgentState, WorkflowStep
 from app.tools.schema_loader import schema_loader
 from app.memory.short_term_memory import session_memory
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 # =============================================================================
@@ -85,6 +88,8 @@ async def sql_generation_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含 generated_sql
     """
+    logger.info(f"SQL Generation 开始处理问题: {state['question'][:50]}...")
+
     llm = create_chat_llm()
     question = state["question"]
     session_id = state["session_id"]
@@ -113,11 +118,14 @@ async def sql_generation_node(state: AgentState) -> AgentState:
         messages.append(HumanMessage(content=f"用户问题: {question}"))
 
     # 调用 LLM 生成 SQL
+    logger.debug("调用 LLM 生成 SQL...")
     sql = llm.invoke(messages)
     sql = sql.strip() if sql else ""
+    logger.debug(f"生成的 SQL: {sql[:100]}...")
 
     # 处理无效 SQL
     if sql == "INVALID_SQL" or not sql:
+        logger.warning("SQL 生成失败，返回 INVALID_SQL")
         return {
             **state,
             "generated_sql": None,
@@ -125,7 +133,7 @@ async def sql_generation_node(state: AgentState) -> AgentState:
             "current_step": WorkflowStep.SQL_GENERATION,
         }
 
-
+    logger.info(f"SQL 生成成功，长度: {len(sql)} 字符")
     return {
         **state,
         "generated_sql": sql,

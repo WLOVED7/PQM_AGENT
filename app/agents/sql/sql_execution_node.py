@@ -18,6 +18,9 @@ generated_sql (已审查) → 执行 SQL → sql_result / sql_error
 from app.state.state import AgentState, WorkflowStep
 from app.tools.sql_validator import SQLValidator, SQLValidationError
 from app.db.connection import fetch_all
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 # 全局验证器
@@ -37,9 +40,11 @@ async def sql_execution_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含 sql_result 或 sql_error
     """
+    logger.info("SQL Execution 开始执行 SQL")
     generated_sql = state.get("generated_sql")
 
     if not generated_sql:
+        logger.error("SQL Execution 终止：没有可执行的 SQL")
         return {
             **state,
             "sql_result": None,
@@ -47,10 +52,13 @@ async def sql_execution_node(state: AgentState) -> AgentState:
             "current_step": WorkflowStep.SQL_EXECUTION,
         }
 
+    logger.debug(f"执行的 SQL: {generated_sql[:100]}...")
+
     # 再次校验 SQL（安全双保险）
     try:
         _validator.validate_and_sanitize(generated_sql)
     except SQLValidationError as e:
+        logger.error(f"SQL 校验失败：{e}")
         return {
             **state,
             "sql_result": None,
@@ -68,6 +76,7 @@ async def sql_execution_node(state: AgentState) -> AgentState:
     }
 
     try:
+        logger.debug("正在执行 SQL 查询...")
         data = await fetch_all(generated_sql)
         # 限制返回行数
         if len(data) > 100:
@@ -75,9 +84,11 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         result["success"] = True
         result["data"] = data
         result["count"] = len(data)
+        logger.info(f"SQL 执行成功，返回 {len(data)} 条数据")
     except Exception as e:
         result["error"] = f"SQL 执行失败: {str(e)}"
         result["success"] = False
+        logger.error(f"SQL 执行失败：{e}")
 
     return {
         **state,

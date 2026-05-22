@@ -18,6 +18,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from app.agents.base.llm import create_chat_llm
 from app.state.state import AgentState, QueryIntent, WorkflowStep
 from app.memory.short_term_memory import session_memory
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 COORDINATOR_PROMPT = """你是 PQM 质量检验知识库的 Coordinator Agent。
@@ -64,6 +67,8 @@ async def coordinator_node(state: AgentState) -> AgentState:
     Returns:
         更新后的 state，包含 intent, use_sql, use_rag
     """
+    logger.info(f"Coordinator 开始处理问题: {state['question'][:50]}...")
+
     llm = create_chat_llm()
     question = state["question"]
     session_id = state["session_id"]
@@ -82,11 +87,17 @@ async def coordinator_node(state: AgentState) -> AgentState:
         messages.append(HumanMessage(content=f"用户问题: {question}"))
 
     # 调用 LLM 判断意图
+    logger.debug("调用 LLM 进行意图识别...")
     response = llm.invoke(messages)
     response_text = response.strip() if response else ""
+    logger.debug(f"LLM 意图识别结果: {response_text[:100]}")
 
     # 解析意图
     intent, use_sql, use_rag = _parse_intent_response(response_text)
+
+    logger.info(f"意图解析完成: intent={intent}, use_sql={use_sql}, use_rag={use_rag}")
+    if intent == QueryIntent.UNKNOWN:
+        logger.warning("无法识别意图，默认使用 SQL 查询")
 
     # 更新记忆 - 记录用户问题
     session_memory.add_message(session_id, "user", question)
