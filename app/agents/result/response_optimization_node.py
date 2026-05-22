@@ -120,10 +120,10 @@ def _build_raw_result_description(
         if count == 0:
             return "没有找到符合条件的数据。"
 
-        # 构建原始数据描述
+        # 构建原始数据描述s
         lines = [f"找到 {count} 条结果：\n"]
         for i, row in enumerate(data, 1):
-            lines.append(f"{i}. {row}")
+            lines.append(f"{i}. {repr(row)}")# row中不能包含字典，有字典需要加repr
 
         if count > 10:
             lines.append(f"\n... 还有 {count - 10} 条结果未显示")

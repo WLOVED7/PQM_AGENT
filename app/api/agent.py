@@ -115,6 +115,10 @@ async def query(request: QueryRequest):
             answer=result.get("final_response") or _build_answer(result),
         )
     except Exception as e:
+        #终端会输出完整错误堆栈
+        import traceback
+        print(f"[ERROR] Agent query failed: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
