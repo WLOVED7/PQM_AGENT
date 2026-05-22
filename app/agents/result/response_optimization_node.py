@@ -83,11 +83,12 @@ async def response_optimization_node(state: AgentState) -> AgentState:
             "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
         }
 
-    # 调用 LLM 优化
+    # 调用 LLM 优化（需转义 raw_result 中的花括号，防止 str.format() 误解析）
     llm = create_chat_llm()
+    escaped_raw_result = raw_result.replace("{", "{{").replace("}", "}}")
     prompt = OPTIMIZATION_PROMPT.format(
         question=question,
-        raw_result=raw_result,
+        raw_result=escaped_raw_result,
     )
 
     messages = [

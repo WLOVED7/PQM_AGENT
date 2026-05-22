@@ -190,5 +190,7 @@ sql_validator = SQLValidator()
 
 # sql_validator验证
 if __name__ == "__main__":
+    from app.utils.logger import get_logger
+    logger = get_logger(__name__)
     result = sql_validator.validate("SELECT * FROM documents LIMIT 10")
-    print("结果:",result)
+    logger.debug(f"Validation result: {result}")

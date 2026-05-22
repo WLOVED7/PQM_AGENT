@@ -255,5 +255,7 @@ def get_all_tables() -> list:
     return list(ALL_SCHEMAS.keys())
 
 if __name__ == "__main__":
-    print(get_table_schema('documents'))
+    from app.utils.logger import get_logger
+    logger = get_logger(__name__)
+    logger.debug(f"Schema: {get_table_schema('documents')}")
     

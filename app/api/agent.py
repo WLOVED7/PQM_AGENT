@@ -27,6 +27,9 @@ from typing import Optional, List, Dict, Any
 
 from app.core.pqm_graph import run_pqm_graph
 from app.memory.short_term_memory import session_memory
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
@@ -115,10 +118,9 @@ async def query(request: QueryRequest):
             answer=result.get("final_response") or _build_answer(result),
         )
     except Exception as e:
-        #终端会输出完整错误堆栈
         import traceback
-        print(f"[ERROR] Agent query failed: {e}")
-        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        logger.error(f"Agent query failed: {e}")
+        logger.debug(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -137,7 +139,7 @@ def _build_answer(result: Dict[str, Any]) -> str:
 
         lines = [f"找到 {count} 条结果：\n"]
         for i, row in enumerate(data[:10], 1):
-            lines.append(f"{i}. {row}")
+            lines.append(f"{i}.repr{row}")
 
         if count > 10:
             lines.append(f"\n... 还有 {count - 10} 条结果未显示")
