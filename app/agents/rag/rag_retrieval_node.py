@@ -86,7 +86,10 @@ async def rag_retrieval_node(state: AgentState) -> AgentState:
 
     return {
         **state,
-        "retrieved_docs": [],  # 占位：后续接入向量数据库
-        "rag_result": answer or "RAG 功能待完善",
+        "rag": {
+            **state.get("rag", {}),
+            "retrieved_docs": [],  # 占位：后续接入向量数据库
+            "answer": answer or "RAG 功能待完善",
+        },
         "current_step": WorkflowStep.RAG_RETRIEVAL,
     }

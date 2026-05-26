@@ -102,23 +102,33 @@ def create_pqm_graph() -> StateGraph:
 
     def route_after_coordinator(state: AgentState) -> str:
         """Coordinator 之后的路由"""
-        if state["use_sql"] and state["use_rag"]:
+        global_context = state.get("global_context", {})
+        use_sql = global_context.get("use_sql", False)
+        use_rag = global_context.get("use_rag", False)
+
+        if use_sql and use_rag:
             # MIXED 模式: 先走 SQL 路径（简化处理）
             return "sql_generation"
-        elif state["use_sql"]:
+        elif use_sql:
             return "sql_generation"
-        elif state["use_rag"]:
+        elif use_rag:
             return "rag_retrieval"
         else:
             return "result_aggregation"
 
     def route_after_critic(state: AgentState) -> str:
         """Critic 之后的路由"""
-        if state["sql_is_valid"]:
+        validation_domain = state.get("validation", {})
+        sql_domain = state.get("sql", {})
+        sql_valid = validation_domain.get("sql_valid", False)
+        retry_count = sql_domain.get("retry_count", 0)
+        max_retries = state.get("max_retries", 2)
+
+        if sql_valid:
             return "sql_execution"
-        elif state["needs_regeneration"]:
-            # 检查重试次数
-            if state["retry_count"] < state["max_retries"]:
+        elif not sql_valid:
+            # 需要重试
+            if retry_count < max_retries:
                 return "sql_generation"  # 重新生成
             else:
                 # 重试耗尽，标记并返回错误

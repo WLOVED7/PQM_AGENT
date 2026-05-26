@@ -41,14 +41,18 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         更新后的 state，包含 sql_result 或 sql_error
     """
     logger.info("SQL Execution 开始执行 SQL")
-    generated_sql = state.get("generated_sql")
+    sql_domain = state.get("sql", {})
+    generated_sql = sql_domain.get("generated_sql")
 
     if not generated_sql:
         logger.error("SQL Execution 终止：没有可执行的 SQL")
         return {
             **state,
-            "sql_result": None,
-            "sql_error": "没有可执行的 SQL",
+            "sql": {
+                **state.get("sql", {}),
+                "sql_result": None,
+                "sql_error": "没有可执行的 SQL",
+            },
             "current_step": WorkflowStep.SQL_EXECUTION,
         }
 
@@ -61,8 +65,11 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         logger.error(f"SQL 校验失败：{e}")
         return {
             **state,
-            "sql_result": None,
-            "sql_error": f"SQL 校验失败: {str(e)}",
+            "sql": {
+                **state.get("sql", {}),
+                "sql_result": None,
+                "sql_error": f"SQL 校验失败: {str(e)}",
+            },
             "current_step": WorkflowStep.SQL_EXECUTION,
         }
 
@@ -92,8 +99,11 @@ async def sql_execution_node(state: AgentState) -> AgentState:
 
     return {
         **state,
-        "sql_result": result if result["success"] else None,
-        "sql_error": result.get("error"),
+        "sql": {
+            **state.get("sql", {}),
+            "sql_result": result if result["success"] else None,
+            "sql_error": result.get("error"),
+        },
         "current_step": WorkflowStep.SQL_EXECUTION,
     }
 

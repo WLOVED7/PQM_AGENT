@@ -33,3 +33,120 @@
 2026-05-22 16:48:28,053 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
 2026-05-22 16:48:28,061 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
 2026-05-22 16:48:28,062 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'
+2026-05-22 17:28:49,710 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-22 17:28:54,238 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-22 17:28:54,244 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-22 17:28:59,218 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-22 17:28:59,218 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-22 17:29:09,998 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 查询逻辑正确，通过 join 连接 documents 和 inspection_items 表，where 条件准确匹配客户
+2026-05-22 17:29:10,000 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-22 17:29:10,003 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据
+2026-05-22 17:29:10,003 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-22 17:29:10,003 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-22 17:29:10,003 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 查询逻辑正确，通过 join 连接 documents 和 inspection_items 表，where 条件准确匹配客户
+2026-05-22 17:29:10,003 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-22 17:29:10,003 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-22 17:29:10,003 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'
+2026-05-23 08:26:39,037 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 08:26:53,767 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-23 08:26:53,767 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 08:26:56,187 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-23 08:26:56,187 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-23 08:27:01,392 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 查询逻辑正确，通过 join 关联 documents 和 inspection_items 表，where 条件完整覆盖了客户（比亚迪）、零件（前横梁）和检验类型（外观），能够准确回答用户问题。语法正确，无 sql 注入风险，字段与 schema 一致。
+2026-05-23 08:27:01,392 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-23 08:27:01,402 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据
+2026-05-23 08:27:01,402 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-23 08:27:01,402 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-23 08:27:01,402 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 查询逻辑正确，通过 join 关联 documents 和 inspection_items 表，where 条件完整覆盖了客户（比亚迪）、零件（前横梁）和检验类型（外观），能够准确回答用户问题。语法正确，无 sql 注入风险，字段与 schema 一致。
+2026-05-23 08:27:01,402 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-23 08:27:01,402 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-23 08:27:01,402 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'
+2026-05-23 09:38:05,854 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 09:38:10,616 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-23 09:38:10,617 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 09:38:13,717 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-23 09:38:13,717 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-23 09:38:29,302 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 查询逻辑正确，能够准确回答用户问题。join 关系准确（inspection_items.document_id → documents.document_id），where 条件覆盖了客户名、零件名和外观检验项。select 字段（inspection_item 和 requirements）能够完整展示外观检测标准。\n\n可优化的建议：\n1. 建议添加 d.status =
+2026-05-23 09:38:29,303 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-23 09:38:29,310 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据
+2026-05-23 09:38:29,310 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-23 09:38:29,310 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-23 09:38:29,310 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 查询逻辑正确，能够准确回答用户问题。join 关系准确（inspection_items.document_id → documents.document_id），where 条件覆盖了客户名、零件名和外观检验项。select 字段（inspection_item 和 requirements）能够完整展示外观检测标准。\n\n可优化的建议：\n1. 建议添加 d.status =
+2026-05-23 09:38:29,310 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-23 09:38:29,310 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-23 09:38:29,310 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'
+2026-05-23 13:43:29,741 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 13:43:32,825 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-23 13:43:32,825 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 13:43:36,321 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 212 字符
+2026-05-23 13:43:36,321 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-23 13:43:36,321 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-23 13:43:36,321 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检测标准是什么...
+2026-05-23 13:43:42,380 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 212 字符
+2026-05-23 13:43:42,380 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-23 13:43:42,380 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-23 13:43:42,380 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-23 13:43:42,380 - app.agents.result.result_aggregation_node - INFO - SQL result: None
+2026-05-23 13:43:42,380 - app.agents.result.result_aggregation_node - INFO - Critic feedback: 安全校验失败: 只允许 SELECT 查询语句
+2026-05-23 13:43:42,380 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-23 13:43:42,380 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-23 13:43:42,380 - app.agents.result.response_optimization_node - INFO - 跳过 LLM 优化，使用原始回复
+2026-05-26 11:30:57,079 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:31:04,204 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-26 11:31:04,208 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:31:06,828 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 212 字符
+2026-05-26 11:31:06,828 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-26 11:31:06,828 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-26 11:31:06,832 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:31:09,107 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-26 11:31:09,107 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-26 11:31:22,838 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=False, needs_regeneration=True, feedback=sql 查询逻辑基本正确，但存在以下问题：\n\n1. **完整性问题 - 缺少状态过滤**: where 条件中缺少 `d.status =
+2026-05-26 11:31:22,839 - app.agents.critic.critic_node - WARNING - SQL 语义审查未通过：sql 查询逻辑基本正确，但存在以下问题：\n\n1. **完整性问题 - 缺少状态过滤**: where 条件中缺少 `d.status =
+2026-05-26 11:31:22,839 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-26 11:31:22,839 - app.agents.result.result_aggregation_node - INFO - SQL result: None
+2026-05-26 11:31:22,839 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 查询逻辑基本正确，但存在以下问题：\n\n1. **完整性问题 - 缺少状态过滤**: where 条件中缺少 `d.status =
+2026-05-26 11:31:22,839 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-26 11:31:22,839 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-26 11:31:22,839 - app.agents.result.response_optimization_node - INFO - 跳过 LLM 优化，使用原始回复
+2026-05-26 11:38:59,783 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:39:04,867 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-26 11:39:04,867 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:39:07,199 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-26 11:39:07,199 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-26 11:39:10,348 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 能够正确回答用户问题。join 关系 (inspection_items.document_id → documents.document_id) 符合 schema 定义的 n:1 关系；where 条件准确过滤了比亚迪客户的
+2026-05-26 11:39:10,348 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-26 11:39:10,428 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据
+2026-05-26 11:39:10,428 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-26 11:39:10,428 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-26 11:39:10,428 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 能够正确回答用户问题。join 关系 (inspection_items.document_id → documents.document_id) 符合 schema 定义的 n:1 关系；where 条件准确过滤了比亚迪客户的
+2026-05-26 11:39:10,428 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-26 11:39:10,432 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-26 11:39:10,432 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'
+2026-05-26 11:47:16,287 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:47:18,568 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-26 11:47:18,572 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 11:47:20,883 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-26 11:47:20,884 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-26 11:47:25,964 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 语法正确，join 关系符合 schema 定义（inspection_items.document_id → documents.document_id）。查询条件覆盖了用户问题的核心要素：客户=
+2026-05-26 11:47:25,964 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-26 11:47:25,970 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据
+2026-05-26 11:47:25,970 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-26 11:47:25,970 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-26 11:47:25,970 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 语法正确，join 关系符合 schema 定义（inspection_items.document_id → documents.document_id）。查询条件覆盖了用户问题的核心要素：客户=
+2026-05-26 11:47:25,970 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-26 11:47:25,972 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-26 11:47:25,972 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'
+2026-05-26 14:51:08,758 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 14:51:11,137 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-26 14:51:11,137 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的外观检验标准是什么...
+2026-05-26 14:51:13,032 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 201 字符
+2026-05-26 14:51:13,032 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-26 14:51:16,735 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 正确地通过 join 关联 inspection_items 和 documents 表，使用 customer=
+2026-05-26 14:51:16,735 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-26 14:51:16,766 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据
+2026-05-26 14:51:16,766 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-26 14:51:16,766 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-26 14:51:16,766 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 正确地通过 join 关联 inspection_items 和 documents 表，使用 customer=
+2026-05-26 14:51:16,766 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-26 14:51:16,766 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-26 14:51:16,766 - app.api.agent - ERROR - Agent query failed: '"inspection_item"'

@@ -67,10 +67,13 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     logger.info("Result Aggregation 开始汇总结果")
 
     question = state["question"]
-    sql_result = state.get("sql_result")
-    sql_error = state.get("sql_error")
-    rag_result = state.get("rag_result")
-    critic_feedback = state.get("critic_feedback")
+    sql_domain = state.get("sql", {})
+    rag_domain = state.get("rag", {})
+    validation_domain = state.get("validation", {})
+    sql_result = sql_domain.get("sql_result")
+    sql_error = sql_domain.get("sql_error")
+    rag_result = rag_domain.get("answer")
+    critic_feedback = validation_domain.get("critic_feedback")
     session_id = state["session_id"]
 
     # 记录各状态信息
@@ -102,10 +105,13 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     session_memory.add_message(session_id, "assistant", final_response)
     logger.info("Result Aggregation 完成，回复已记录到记忆系统")
 
-    # 存储原始回复供后续优化（留空，由 response_optimization_node 处理）
+    # 存储原始回复供后续优化
     return {
         **state,
-        "raw_response": final_response,  # 原始回复，response_optimization 会进一步处理
+        "result": {
+            **state.get("result", {}),
+            "raw_response": final_response,
+        },
         "current_step": WorkflowStep.RESULT_AGGREGATION,
     }
 
@@ -144,7 +150,7 @@ def _generate_final_response(
         lines = [f"找到 {count} 条结果：\n"]
 
         for i, row in enumerate(data[:10], 1):  # 最多显示10条
-            lines.append(f"{i}. {row}")
+            lines.append(f"{i}. {repr(row)}")
 
         if count > 10:
             lines.append(f"\n... 还有 {count - 10} 条结果未显示")

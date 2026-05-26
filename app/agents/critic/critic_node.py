@@ -44,19 +44,23 @@ CRITIC_PROMPT = """你是 SQL 质量审查专家，负责验证生成的 SQL 是
 【Schema 上下文】
 {schema_context}
 
-【审查维度】
-1. 正确性: SQL 能否正确回答用户问题
-2. 安全性: 是否有 SQL 注入风险
-3. 完整性: WHERE 条件是否完整
-4. 效率: LIMIT 是否过大、是否有多余查询
-5. 语法: SQL 语法是否正确
+【审查原则】
+1. **以用户问题为导向**：只关注 SQL 能否回答用户问题，不要过度要求无关字段
+2. **安全校验**：检查 SQL 注入风险（黑名单关键词已由第一层校验）
+3. **基本语法**：确保 SQL 语法正确、表名字段与 Schema 一致
+4. **可执行性**：确保 SQL 能成功执行并返回结果
 
-【无效的常见原因】
-- 无法回答用户问题（如查询了错误的表/字段）
-- JOIN 关系错误
-- WHERE 条件遗漏
-- LIMIT 过大（>100）
-- 字段名/表名与 Schema 不符
+【宽容度】
+- 如果 SQL 能回答用户的核心问题，即使缺少可选字段，也应判定为有效
+- 不要因为"可能有用但用户未要求"的字段缺失而要求重试
+- LIMIT 默认值 100 是合理的，不需要报错
+- 只有当 SQL 无法回答用户问题时，才要求重试
+
+【无效的判定标准】
+- SQL 查询结果不能覆盖用户问题的核心需求
+- 字段名/表名与 Schema 明显不符
+- JOIN 关系完全错误
+- 存在 SQL 注入风险（第一层已校验，此条可不重复校验）
 
 【输出格式】
 JSON: {{"is_valid": true/false, "feedback": "原因说明", "needs_regeneration": true/false}}"""
@@ -205,16 +209,19 @@ async def critic_node(state: AgentState) -> AgentState:
     """
     logger.info("Critic 开始审查 SQL")
     question = state["question"]
-    generated_sql = state.get("generated_sql", "")
+    sql_domain = state.get("sql", {})
+    generated_sql = sql_domain.get("generated_sql", "")
 
     # 如果没有 SQL，直接返回无效
     if not generated_sql:
         logger.warning("Critic 审查终止：没有可审查的 SQL")
         return {
             **state,
-            "sql_is_valid": False,
-            "critic_feedback": "没有可审查的 SQL",
-            "needs_regeneration": True,
+            "validation": {
+                **state.get("validation", {}),
+                "sql_valid": False,
+                "critic_feedback": "没有可审查的 SQL",
+            },
             "current_step": WorkflowStep.CRITIC_REVIEW,
         }
 
@@ -228,9 +235,11 @@ async def critic_node(state: AgentState) -> AgentState:
         logger.warning(f"第一层校验失败：{error}")
         return {
             **state,
-            "sql_is_valid": False,
-            "critic_feedback": f"安全校验失败: {error}",
-            "needs_regeneration": True,
+            "validation": {
+                **state.get("validation", {}),
+                "sql_valid": False,
+                "critic_feedback": f"安全校验失败: {error}",
+            },
             "current_step": WorkflowStep.CRITIC_REVIEW,
         }
     logger.debug("第一层校验通过")
@@ -242,9 +251,11 @@ async def critic_node(state: AgentState) -> AgentState:
         logger.warning(f"第二层校验失败：{error}")
         return {
             **state,
-            "sql_is_valid": False,
-            "critic_feedback": f"Schema 引用校验失败: {error}",
-            "needs_regeneration": True,
+            "validation": {
+                **state.get("validation", {}),
+                "sql_valid": False,
+                "critic_feedback": f"Schema 引用校验失败: {error}",
+            },
             "current_step": WorkflowStep.CRITIC_REVIEW,
         }
     logger.debug("第二层校验通过")
@@ -260,8 +271,14 @@ async def critic_node(state: AgentState) -> AgentState:
 
     return {
         **state,
-        "sql_is_valid": semantic_result["is_valid"],
-        "critic_feedback": semantic_result["feedback"] or "SQL 审查完成",
-        "needs_regeneration": semantic_result["needs_regeneration"],
+        "sql": {
+            **state.get("sql", {}),
+            "retry_count": sql_domain.get("retry_count", 0) + 1,
+        },
+        "validation": {
+            **state.get("validation", {}),
+            "sql_valid": semantic_result["is_valid"],
+            "critic_feedback": semantic_result["feedback"] or "SQL 审查完成",
+        },
         "current_step": WorkflowStep.CRITIC_REVIEW,
     }

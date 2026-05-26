@@ -89,6 +89,7 @@ async def coordinator_node(state: AgentState) -> AgentState:
     # 调用 LLM 判断意图
     logger.debug("调用 LLM 进行意图识别...")
     response = llm.invoke(messages)
+    print(f"---llm执行结果{response}---")
     response_text = response.strip() if response else ""
     logger.debug(f"LLM 意图识别结果: {response_text[:100]}")
 
@@ -105,8 +106,11 @@ async def coordinator_node(state: AgentState) -> AgentState:
     return {
         **state,
         "intent": intent,
-        "use_sql": use_sql,
-        "use_rag": use_rag,
+        "global_context": {
+            **state.get("global_context", {}),
+            "use_sql": use_sql,
+            "use_rag": use_rag,
+        },
         "current_step": WorkflowStep.COORDINATOR,
     }
 

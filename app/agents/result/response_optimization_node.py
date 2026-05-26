@@ -67,9 +67,11 @@ async def response_optimization_node(state: AgentState) -> AgentState:
     logger.info("Response Optimization 开始优化回复")
 
     question = state["question"]
-    sql_result = state.get("sql_result")
-    rag_result = state.get("rag_result")
-    sql_error = state.get("sql_error")
+    sql_domain = state.get("sql", {})
+    rag_domain = state.get("rag", {})
+    sql_result = sql_domain.get("sql_result")
+    rag_result = rag_domain.get("answer")
+    sql_error = sql_domain.get("sql_error")
     retry_exhausted = state.get("retry_exhausted", False)
 
     # 构建原始结果描述
@@ -87,7 +89,10 @@ async def response_optimization_node(state: AgentState) -> AgentState:
         logger.debug(f"原始回复: {raw_result[:100]}...")
         return {
             **state,
-            "final_response": raw_result,
+            "result": {
+                **state.get("result", {}),
+                "final_response": raw_result,
+            },
             "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
         }
 
@@ -113,7 +118,10 @@ async def response_optimization_node(state: AgentState) -> AgentState:
 
     return {
         **state,
-        "final_response": optimized_response,
+        "result": {
+            **state.get("result", {}),
+            "final_response": optimized_response,
+        },
         "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
     }
 

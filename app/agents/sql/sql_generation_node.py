@@ -128,15 +128,20 @@ async def sql_generation_node(state: AgentState) -> AgentState:
         logger.warning("SQL 生成失败，返回 INVALID_SQL")
         return {
             **state,
-            "generated_sql": None,
-            "error": "无法为该问题生成有效的 SQL",
+            "sql": {
+                **state.get("sql", {}),
+                "generated_sql": None,
+                "error": "无法为该问题生成有效的 SQL",
+            },
             "current_step": WorkflowStep.SQL_GENERATION,
         }
 
     logger.info(f"SQL 生成成功，长度: {len(sql)} 字符")
     return {
         **state,
-        "generated_sql": sql,
+        "sql": {
+            **state.get("sql", {}),
+            "generated_sql": sql,
+        },
         "current_step": WorkflowStep.SQL_GENERATION,
-        "retry_count": state.get("retry_count", 0) + 1,  # 重试时递增
     }

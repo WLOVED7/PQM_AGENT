@@ -99,9 +99,12 @@ async def query(request: QueryRequest):
             session_id=request.session_id,
         )
 
-        # 提取结果
-        sql_result = result.get("sql_result")
-        sql_error = result.get("sql_error")
+        # 提取结果 - 从业务域读取
+        sql_domain = result.get("sql", {})
+        rag_domain = result.get("rag", {})
+        result_domain = result.get("result", {})
+        sql_result = sql_domain.get("sql_result")
+        sql_error = sql_domain.get("sql_error")
 
         # 构建回复
         success = sql_result.get("success", False) if sql_result else False
@@ -111,11 +114,11 @@ async def query(request: QueryRequest):
             question=result["question"],
             session_id=result["session_id"],
             intent=result.get("intent", "unknown"),
-            sql=result.get("generated_sql"),
+            sql=sql_domain.get("generated_sql"),
             data=sql_result.get("data") if sql_result else None,
             count=sql_result.get("count", 0) if sql_result else 0,
             error=sql_error,
-            answer=result.get("final_response") or _build_answer(result),
+            answer=result_domain.get("final_response") or _build_answer(result),
         )
     except Exception as e:
         import traceback
@@ -126,9 +129,11 @@ async def query(request: QueryRequest):
 
 def _build_answer(result: Dict[str, Any]) -> str:
     """构建最终回复文本"""
-    sql_result = result.get("sql_result")
-    sql_error = result.get("sql_error")
-    rag_result = result.get("rag_result")
+    sql_domain = result.get("sql", {})
+    rag_domain = result.get("rag", {})
+    sql_result = sql_domain.get("sql_result")
+    sql_error = sql_domain.get("sql_error")
+    rag_result = rag_domain.get("answer")
 
     if sql_result and sql_result.get("success"):
         data = sql_result.get("data", [])
@@ -139,7 +144,7 @@ def _build_answer(result: Dict[str, Any]) -> str:
 
         lines = [f"找到 {count} 条结果：\n"]
         for i, row in enumerate(data[:10], 1):
-            lines.append(f"{i}.repr{row}")
+            lines.append(f"{i}. {repr(row)}")
 
         if count > 10:
             lines.append(f"\n... 还有 {count - 10} 条结果未显示")

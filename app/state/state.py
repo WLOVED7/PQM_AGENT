@@ -6,16 +6,18 @@ LangGraph State 定义 (state/state.py)
 【用途】
 定义多 Agent 系统的共享状态，所有节点通过这个状态通信。
 
-【状态设计原则】
-- 感知 (Perception): question, session_history
-- 理解 (Understanding): intent, use_sql, use_rag
-- 执行 (Execution): generated_sql, sql_result, sql_is_valid
-- 记忆 (Memory): session_history, session_id
+【状态设计原则 - 业务域隔离】
+- 全局共享: question, session_id, current_step, intent
+- SQL Domain: generated_sql, sql_result, sql_error, retry_count
+- RAG Domain: retrieved_docs, reranked_docs, answer
+- Validation Domain: sql_valid, hallucination_score, critic_feedback
+- Result Domain: raw_response, final_response
 """
 from typing import TypedDict, Annotated, Optional, Literal
 from enum import Enum
 
 from langgraph.graph import add_messages
+from app.state.reducers import merge_reducer
 
 
 class QueryIntent(str, Enum):
@@ -37,54 +39,70 @@ class WorkflowStep(str, Enum):
     RESPONSE_OPTIMIZATION = "response_optimization"
 
 
+# ===== 业务域类型 =====
+
+
+class SQLState(TypedDict):
+    """SQL 业务域状态"""
+    generated_sql: Optional[str]
+    sql_result: Optional[dict]
+    sql_error: Optional[str]
+    retry_count: int
+    sql_is_valid: bool
+
+
+class RAGState(TypedDict):
+    """RAG 业务域状态"""
+    retrieved_docs: Optional[list]
+    reranked_docs: Optional[list]
+    answer: Optional[str]
+
+
+class ValidationState(TypedDict):
+    """校验域状态"""
+    sql_valid: bool
+    hallucination_score: Optional[float]
+    critic_feedback: Optional[str]
+
+
+class ResultState(TypedDict):
+    """结果域状态"""
+    raw_response: Optional[str]
+    final_response: Optional[str]
+
+
 class AgentState(TypedDict):
     """
     LangGraph 多 Agent 系统共享状态
 
-    【结构】
-    - 用户输入: question, session_id
-    - 意图分发: intent, use_sql, use_rag
-    - SQL 工作流: generated_sql, sql_result, sql_is_valid
-    - RAG 工作流: retrieved_docs, rag_result
-    - Critic 反馈: critic_feedback, needs_regeneration
-    - 记忆系统: session_history
-    - 工作流控制: current_step, retry_count, max_retries, error
+    【结构 - 业务域隔离】
+    - 全局共享: question, session_id, current_step, intent, global_context
+    - SQL Domain: SQL 生成和执行相关状态
+    - RAG Domain: RAG 检索相关状态
+    - Validation Domain: SQL/RAG 校验相关状态
+    - Result Domain: 最终结果相关状态
     """
 
-    # === 用户输入 ===
+    # === 全局共享 ===
     question: str
     session_id: str
-
-    # === 意图 & 分发 ===
     intent: QueryIntent
-    use_sql: bool
-    use_rag: bool
-
-    # === SQL 工作流 ===
-    generated_sql: Optional[str]
-    sql_result: Optional[dict]
-    sql_error: Optional[str]
-    sql_is_valid: bool
-
-    # === RAG 工作流 ===
-    retrieved_docs: Optional[list]
-    rag_result: Optional[str]
-
-    # === Critic 反馈 ===
-    critic_feedback: Optional[str]
-    needs_regeneration: bool
+    current_step: WorkflowStep
+    global_context: Annotated[dict, merge_reducer]
 
     # === 记忆系统 ===
     session_history: Annotated[list[dict], add_messages]
 
+    # === 业务域 ===
+    sql: Annotated[SQLState, merge_reducer]
+    rag: Annotated[RAGState, merge_reducer]
+    validation: Annotated[ValidationState, merge_reducer]
+    result: Annotated[ResultState, merge_reducer]
+
     # === 工作流控制 ===
-    current_step: WorkflowStep
-    retry_count: int
     max_retries: int
     error: Optional[str]
     retry_exhausted: bool
-    raw_response: Optional[str]  # result_aggregation 生成的原始回复
-    final_response: Optional[str]  # LLM优化后的最终回复
 
 
 def create_initial_state(
@@ -107,19 +125,30 @@ def create_initial_state(
         question=question,
         session_id=session_id,
         intent=QueryIntent.UNKNOWN,
-        use_sql=False,
-        use_rag=False,
-        generated_sql=None,
-        sql_result=None,
-        sql_error=None,
-        sql_is_valid=False,
-        retrieved_docs=None,
-        rag_result=None,
-        critic_feedback=None,
-        needs_regeneration=False,
-        session_history=[],
         current_step=WorkflowStep.COORDINATOR,
-        retry_count=0,
+        global_context={},
+        session_history=[],
+        sql={
+            "generated_sql": None,
+            "sql_result": None,
+            "sql_error": None,
+            "retry_count": 0,
+            "sql_is_valid": False,
+        },
+        rag={
+            "retrieved_docs": None,
+            "reranked_docs": None,
+            "answer": None,
+        },
+        validation={
+            "sql_valid": False,
+            "hallucination_score": None,
+            "critic_feedback": None,
+        },
+        result={
+            "raw_response": None,
+            "final_response": None,
+        },
         max_retries=max_retries,
         error=None,
         retry_exhausted=False,
