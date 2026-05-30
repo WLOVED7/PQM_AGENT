@@ -419,3 +419,18 @@
 2026-05-30 10:38:05,271 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
 2026-05-30 10:38:05,271 - app.agents.result.response_optimization_node - WARNING - LLM 优化失败，使用原始回复: '"inspection_item"'
 2026-05-30 10:38:05,271 - app.agents.result.response_optimization_node - INFO - Response Optimization 完成，优化后回复长度: 129 字符
+2026-05-30 11:17:40,880 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:17:48,800 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-30 11:17:48,803 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:17:56,387 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 221 字符
+2026-05-30 11:17:56,388 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-30 11:18:01,432 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 正确地连接 inspection_items 和 documents 表，通过 customer=
+2026-05-30 11:18:01,432 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-30 11:18:01,432 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据，1 个 PDF 文件
+2026-05-30 11:18:01,432 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-30 11:18:01,432 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-30 11:18:01,432 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 正确地连接 inspection_items 和 documents 表，通过 customer=
+2026-05-30 11:18:01,432 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-30 11:18:01,432 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-30 11:18:01,442 - app.agents.result.response_optimization_node - WARNING - LLM 优化失败，使用原始回复: '"inspection_item"'
+2026-05-30 11:18:01,442 - app.agents.result.response_optimization_node - INFO - Response Optimization 完成，优化后回复长度: 129 字符
