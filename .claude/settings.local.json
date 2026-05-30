@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(mkdir -p app/db app/tools app/prompts app/agents)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(python -c \"from langgraph.checkpoint.memory import MemorySaver; print\\('MemorySaver OK'\\)\")"
     ],
     "additionalDirectories": [
       "e:\\质量办文件\\project_agent\\PQM_agent\\PQM\\app\\db"

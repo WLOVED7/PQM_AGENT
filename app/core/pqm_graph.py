@@ -55,8 +55,13 @@ PQM LangGraph 主图 (core/pqm_graph.py)
     │result_aggregation│  │sql_generation   │  │result_aggregation  │
     └─────────────────┘  │(retry + 1)     │  │  (return error)     │
                          └─────────────────┘  └─────────────────────┘
+
+【检查点 (Checkpoint)】
+当前版本 (langgraph 1.1.10) 使用 MemorySaver 内存存储。
+后续升级到 langgraph >= 1.3.0 后可切换到 SqliteSaver 持久化存储。
 """
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from app.state.state import AgentState, WorkflowStep
 from app.agents.coordinator.coordinator_node import coordinator_node
@@ -68,7 +73,19 @@ from app.agents.result.result_aggregation_node import result_aggregation_node
 from app.agents.result.response_optimization_node import response_optimization_node
 
 
-def create_pqm_graph() -> StateGraph:
+# ===== 检查点存储 =====
+_checkpointer = None
+
+
+def get_checkpointer() -> MemorySaver:
+    """获取或创建检查点存储（内存模式）"""
+    global _checkpointer
+    if _checkpointer is None:
+        _checkpointer = MemorySaver()
+    return _checkpointer
+
+
+def create_pqm_graph(checkpointer: MemorySaver = None) -> StateGraph:
     """
     创建 PQM LangGraph
 
@@ -174,11 +191,39 @@ def create_pqm_graph() -> StateGraph:
     # 结束
     graph.add_edge("response_optimization", END)
 
+    # 使用检查点（如果提供）
+    if checkpointer:
+        return graph.compile(checkpointer=checkpointer)
     return graph.compile()
 
 
 # ===== 全局图实例 =====
-pqm_graph = create_pqm_graph()
+pqm_graph = create_pqm_graph(get_checkpointer())
+
+
+async def run_pqm_graph_stream(question: str, session_id: str):
+    """
+    运行 PQM Graph (流式版本)
+
+    Args:
+        question: 用户问题
+        session_id: Session ID (用作 checkpoint thread_id)
+
+    Yields:
+        每个节点的输出
+    """
+    from app.state.state import create_initial_state
+
+    initial_state = create_initial_state(
+        question=question,
+        session_id=session_id,
+        max_retries=2,
+    )
+
+    config = {"configurable": {"thread_id": session_id}}
+
+    async for chunk in pqm_graph.astream(initial_state, config=config, stream_mode="updates"):
+        yield chunk
 
 
 async def run_pqm_graph(question: str, session_id: str) -> AgentState:
@@ -187,7 +232,7 @@ async def run_pqm_graph(question: str, session_id: str) -> AgentState:
 
     Args:
         question: 用户问题
-        session_id: Session ID
+        session_id: Session ID (用作 checkpoint thread_id)
 
     Returns:
         最终状态
@@ -200,5 +245,6 @@ async def run_pqm_graph(question: str, session_id: str) -> AgentState:
         max_retries=2,
     )
 
-    result = await pqm_graph.ainvoke(initial_state)
+    config = {"configurable": {"thread_id": session_id}}
+    result = await pqm_graph.ainvoke(initial_state, config=config)
     return result

@@ -56,6 +56,7 @@ class QueryResponse(BaseModel):
     count: int = 0
     error: Optional[str] = None
     answer: Optional[str] = None
+    pdf_urls: Optional[List[str]] = Field(default=None, description="相关 SIP PDF 文件 URL 列表")
 
 
 class HistoryResponse(BaseModel):
@@ -119,6 +120,7 @@ async def query(request: QueryRequest):
             count=sql_result.get("count", 0) if sql_result else 0,
             error=sql_error,
             answer=result_domain.get("final_response") or _build_answer(result),
+            pdf_urls=sql_result.get("pdf_urls", []) if sql_result else [],
         )
     except Exception as e:
         import traceback

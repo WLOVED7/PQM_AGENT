@@ -56,21 +56,29 @@ SQL_GENERATION_PROMPT = """你是质量检验知识库的 SQL 生成专家。
 只输出 SQL 语句，不要其他内容。
 如果无法生成 SQL，输出: INVALID_SQL
 
+【重要】每次查询必须在 SELECT 中包含 d.document_id 字段，用于拼接 PDF 链接
+
 【示例】
 用户问题: 前横梁的硬度标准是什么？
 SQL:
-SELECT i.inspection_item, i.requirements
+SELECT i.inspection_item, i.requirements, d.document_id
 FROM inspection_items i
 JOIN documents d ON i.document_id = d.document_id
-WHERE d.part_name = '前横梁'
+WHERE d.part_name LIKE '%前横梁%'
   AND i.inspection_item LIKE '%硬度%'
 
 用户问题: 哪些项目的AQL是0.65？
 SQL:
-SELECT DISTINCT d.project, d.part_name
+SELECT DISTINCT d.project, d.part_name, d.document_id
 FROM inspection_items i
 JOIN documents d ON i.document_id = d.document_id
 WHERE JSON_EXTRACT(i.sampling_plan, '$.aql') = '0.65'
+
+用户问题: 前横梁的SIP文档在哪里？
+SQL:
+SELECT d.document_id, d.part_name, d.version
+FROM documents d
+WHERE d.part_name LIKE '%前横梁%'
 """
 
 

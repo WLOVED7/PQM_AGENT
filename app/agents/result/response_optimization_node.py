@@ -98,20 +98,24 @@ async def response_optimization_node(state: AgentState) -> AgentState:
 
     # 调用 LLM 优化（需转义 raw_result 中的花括号，防止 str.format() 误解析）
     logger.debug("调用 LLM 优化回复...")
-    llm = create_chat_llm()
-    escaped_raw_result = raw_result.replace("{", "{{").replace("}", "}}")
-    prompt = OPTIMIZATION_PROMPT.format(
-        question=question,
-        raw_result=escaped_raw_result,
-    )
+    try:
+        llm = create_chat_llm()
+        escaped_raw_result = raw_result.replace("{", "{{").replace("}", "}}")
+        prompt = OPTIMIZATION_PROMPT.format(
+            question=question,
+            raw_result=escaped_raw_result,
+        )
 
-    messages = [
-        SystemMessage(content="你是一个专业的质量检验知识库助手，擅长将原始数据格式化为友好的回复。"),
-        HumanMessage(content=prompt),
-    ]
+        messages = [
+            SystemMessage(content="你是一个专业的质量检验知识库助手，擅长将原始数据格式化为友好的回复。"),
+            HumanMessage(content=prompt),
+        ]
 
-    optimized_response = llm.invoke(messages)
-    optimized_response = optimized_response.strip() if optimized_response else raw_result
+        optimized_response = llm.invoke(messages)
+        optimized_response = optimized_response.strip() if optimized_response else raw_result
+    except Exception as e:
+        logger.warning(f"LLM 优化失败，使用原始回复: {e}")
+        optimized_response = raw_result
 
     logger.info(f"Response Optimization 完成，优化后回复长度: {len(optimized_response)} 字符")
     logger.debug(f"最终回复: {optimized_response[:100]}...")
@@ -124,6 +128,26 @@ async def response_optimization_node(state: AgentState) -> AgentState:
         },
         "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
     }
+
+
+def _format_row_for_display(row: dict) -> str:
+    """格式化行数据为易读字符串"""
+    parts = []
+    for key, value in row.items():
+        if value is None:
+            continue
+        # JSON 字符串解析
+        if isinstance(value, str) and value.startswith('['):
+            try:
+                import json
+                value = json.loads(value)
+            except:
+                pass
+        # 格式化
+        if isinstance(value, list):
+            value = ' | '.join(str(v) for v in value)
+        parts.append(f"{key}: {value}")
+    return ", ".join(parts)
 
 
 def _build_raw_result_description(
@@ -141,10 +165,11 @@ def _build_raw_result_description(
         if count == 0:
             return "没有找到符合条件的数据。"
 
-        # 构建原始数据描述s
+        # 构建原始数据描述
         lines = [f"找到 {count} 条结果：\n"]
         for i, row in enumerate(data, 1):
-            lines.append(f"{i}. {repr(row)}")# row中不能包含字典，有字典需要加repr
+            row_str = _format_row_for_display(row)
+            lines.append(f"{i}. {row_str}")
 
         if count > 10:
             lines.append(f"\n... 还有 {count - 10} 条结果未显示")

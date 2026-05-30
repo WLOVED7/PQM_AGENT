@@ -29,9 +29,11 @@ inspection_items   - 检验项目表
 document_changes   - 版本变更记录表
 """
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.api import api_router
@@ -81,6 +83,11 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(api_router, prefix=settings.API_PREFIX)
+
+# 挂载 SIP 文件目录（如果存在）
+DOCUMENTS_DIR = Path(__file__).parent.parent / "documents"
+if DOCUMENTS_DIR.exists():
+    app.mount("/documents", StaticFiles(directory=str(DOCUMENTS_DIR)), name="documents")
 
 
 @app.get("/", tags=["健康检查"])

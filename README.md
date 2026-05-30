@@ -176,10 +176,7 @@ PQM/
 ├── scripts/
 │   └── import_data.py          # 数据导入脚本
 │
-├── alembic/                     # 数据库迁移
-│
 ├── requirements.txt             # 依赖
-├── alembic.ini                 # Alembic 配置
 └── .env                        # 环境变量
 ```
 
@@ -363,10 +360,8 @@ fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 sqlalchemy>=2.0.25
 aiomysql>=0.2.0
-pymysql>=1.1.0
 pydantic>=2.6.0
 pydantic-settings>=2.1.0
-alembic>=1.13.0
 tqdm>=4.66.0
 python-dotenv>=1.0.0
 langgraph>=0.2.0

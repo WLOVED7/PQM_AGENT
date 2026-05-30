@@ -47,15 +47,6 @@ class Settings(BaseSettings):
             f"?charset={self.DB_CHARSET}"
         )
 
-    @property
-    def SYNC_DATABASE_URL(self) -> str:
-        """同步数据库URL (用于Alembic)"""
-        return (
-            f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-            f"?charset={self.DB_CHARSET}"
-        )
-
     # 日志配置
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG"
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

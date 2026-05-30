@@ -5,15 +5,10 @@ uvicorn[standard]>=0.27.0
 # Database
 sqlalchemy>=2.0.25
 aiomysql>=0.2.0
-pymysql>=1.1.0
-cryptography>=42.0.0
 
 # Pydantic
 pydantic>=2.6.0
 pydantic-settings>=2.1.0
-
-# Alembic
-alembic>=1.13.0
 
 # LangGraph (Multi-Agent)
 langgraph>=0.2.0
