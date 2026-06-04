@@ -434,3 +434,420 @@
 2026-05-30 11:18:01,432 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
 2026-05-30 11:18:01,442 - app.agents.result.response_optimization_node - WARNING - LLM 优化失败，使用原始回复: '"inspection_item"'
 2026-05-30 11:18:01,442 - app.agents.result.response_optimization_node - INFO - Response Optimization 完成，优化后回复长度: 129 字符
+2026-05-30 11:29:36,430 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:29:40,017 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-05-30 11:29:40,019 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:29:43,053 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 237 字符
+2026-05-30 11:29:43,054 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-30 11:29:43,054 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-30 11:29:43,055 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:29:45,852 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 143 字符
+2026-05-30 11:29:45,853 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-30 11:29:45,853 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-30 11:29:45,854 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:29:49,368 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 131 字符
+2026-05-30 11:29:49,368 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-30 11:29:49,368 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-30 11:29:49,370 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:29:53,324 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 232 字符
+2026-05-30 11:29:53,325 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-30 11:29:53,325 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-05-30 11:29:53,326 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁的硬度标准是什么...
+2026-05-30 11:29:59,402 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 221 字符
+2026-05-30 11:29:59,402 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-05-30 11:30:05,857 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 能有效回答用户问题。通过 customer=
+2026-05-30 11:30:05,857 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-05-30 11:30:05,857 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据，1 个 PDF 文件
+2026-05-30 11:30:05,857 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-05-30 11:30:05,857 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-05-30 11:30:05,857 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 能有效回答用户问题。通过 customer=
+2026-05-30 11:30:05,857 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-05-30 11:30:05,857 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-05-30 11:30:05,857 - app.agents.result.response_optimization_node - WARNING - LLM 优化失败，使用原始回复: '"inspection_item"'
+2026-05-30 11:30:05,857 - app.agents.result.response_optimization_node - INFO - Response Optimization 完成，优化后回复长度: 129 字符
+2026-06-02 12:09:02,979 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 你好...
+2026-06-02 12:09:16,795 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-06-02 12:09:16,798 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:20,031 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 227 字符
+2026-06-02 12:09:20,034 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:20,034 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:20,036 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:25,296 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 112 字符
+2026-06-02 12:09:25,296 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:25,296 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:25,296 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:27,676 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 49 字符
+2026-06-02 12:09:27,676 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:27,676 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:27,678 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:30,134 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 55 字符
+2026-06-02 12:09:30,134 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:30,134 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:30,138 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:33,092 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:09:33,096 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:33,096 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:09:33,096 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:35,411 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 38 字符
+2026-06-02 12:09:35,411 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:35,411 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:35,413 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:38,969 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 29 字符
+2026-06-02 12:09:38,969 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:38,969 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:38,969 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:40,979 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:09:40,979 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:40,979 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:09:40,979 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:42,860 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:09:42,865 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:42,865 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:09:42,865 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:44,784 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 105 字符
+2026-06-02 12:09:44,784 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:44,784 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:44,784 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:47,746 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 200 字符
+2026-06-02 12:09:47,746 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:47,746 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:47,746 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:49,072 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 27 字符
+2026-06-02 12:09:49,072 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:49,072 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:49,072 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:50,707 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 14 字符
+2026-06-02 12:09:50,707 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:50,707 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:50,707 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:52,346 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 13 字符
+2026-06-02 12:09:52,346 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:52,346 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:52,346 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:54,223 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 115 字符
+2026-06-02 12:09:54,223 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:54,223 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:54,225 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:56,863 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:09:56,864 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:56,864 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:09:56,867 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:09:58,573 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 54 字符
+2026-06-02 12:09:58,573 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:09:58,573 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:09:58,578 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:00,319 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 12 字符
+2026-06-02 12:10:00,319 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:00,319 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:00,323 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:03,380 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 110 字符
+2026-06-02 12:10:03,380 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:03,380 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:03,384 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:06,792 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 70 字符
+2026-06-02 12:10:06,793 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:06,793 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:06,794 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:08,795 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 128 字符
+2026-06-02 12:10:08,796 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:08,796 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:08,797 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:11,338 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 99 字符
+2026-06-02 12:10:11,338 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:11,338 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:11,338 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:12,822 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:10:12,822 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:12,822 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:10:12,826 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:14,972 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 121 字符
+2026-06-02 12:10:14,973 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:14,973 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:14,975 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:16,710 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 109 字符
+2026-06-02 12:10:16,710 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:16,710 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:16,713 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:18,596 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 115 字符
+2026-06-02 12:10:18,596 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:18,596 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:18,596 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:20,373 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:10:20,373 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:20,373 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:10:20,377 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:22,215 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 12 字符
+2026-06-02 12:10:22,216 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:22,216 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:22,218 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:26,037 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 45 字符
+2026-06-02 12:10:26,041 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:26,041 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:26,041 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:28,046 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 118 字符
+2026-06-02 12:10:28,046 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:28,046 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:28,046 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:32,567 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:10:32,567 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:32,567 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:10:32,571 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:35,241 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 34 字符
+2026-06-02 12:10:35,241 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:35,241 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:35,245 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:37,135 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 41 字符
+2026-06-02 12:10:37,135 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:37,135 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:37,135 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:39,728 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:10:39,728 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:39,728 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:10:39,728 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:41,979 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:10:41,983 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:41,983 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:10:41,983 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:48,914 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 129 字符
+2026-06-02 12:10:48,914 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:48,914 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:48,914 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:50,589 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:10:50,589 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:50,589 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:10:50,592 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:52,135 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 52 字符
+2026-06-02 12:10:52,139 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:52,139 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:52,139 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:55,067 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 106 字符
+2026-06-02 12:10:55,067 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:55,067 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:55,067 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:58,221 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 13 字符
+2026-06-02 12:10:58,221 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:58,221 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:58,227 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:10:59,819 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 39 字符
+2026-06-02 12:10:59,819 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:10:59,819 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:10:59,819 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:02,502 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:02,502 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:02,502 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:02,502 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:04,400 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 57 字符
+2026-06-02 12:11:04,400 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:04,400 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:04,400 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:07,924 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 124 字符
+2026-06-02 12:11:07,924 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:07,924 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:07,928 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:10,609 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:10,609 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:10,609 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:10,609 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:12,909 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:12,909 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:12,909 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:12,911 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:15,382 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 53 字符
+2026-06-02 12:11:15,382 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:15,382 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:15,387 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:17,146 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:17,146 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:17,146 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:17,146 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:21,414 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:21,414 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:21,414 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:21,414 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:24,444 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 205 字符
+2026-06-02 12:11:24,448 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:24,448 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:24,448 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:26,881 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 218 字符
+2026-06-02 12:11:26,881 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:26,881 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:26,885 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:28,780 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:28,784 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:28,784 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:28,784 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:30,837 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 120 字符
+2026-06-02 12:11:30,838 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:30,838 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:30,838 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:33,335 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:11:33,335 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:33,335 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:11:33,339 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:11:51,393 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 153 字符
+2026-06-02 12:11:51,397 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:11:51,397 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:11:51,397 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:00,273 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:00,273 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:00,273 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:00,273 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:02,427 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 13 字符
+2026-06-02 12:12:02,427 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:02,427 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:02,431 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:04,633 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:04,637 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:04,637 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:04,637 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:07,674 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:07,674 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:07,674 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:07,674 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:09,533 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:09,533 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:09,533 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:09,533 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:12,817 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 189 字符
+2026-06-02 12:12:12,817 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:12,817 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:12,817 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:15,032 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 119 字符
+2026-06-02 12:12:15,033 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:15,033 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:15,033 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:16,986 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:16,986 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:16,986 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:16,986 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:19,363 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:19,363 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:19,363 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:19,367 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:22,674 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 260 字符
+2026-06-02 12:12:22,674 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:22,674 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:22,678 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:26,373 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:26,373 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:26,373 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:26,373 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:28,321 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:28,321 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:28,321 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:28,321 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:31,947 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 131 字符
+2026-06-02 12:12:31,947 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:31,947 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:31,947 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:37,358 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 129 字符
+2026-06-02 12:12:37,362 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:37,362 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:37,362 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:39,013 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:39,017 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:39,017 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:39,017 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:41,092 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 29 字符
+2026-06-02 12:12:41,092 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:41,092 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:41,092 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:44,199 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 165 字符
+2026-06-02 12:12:44,203 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:44,203 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:44,203 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:45,725 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:45,730 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:45,730 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:45,730 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:47,718 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:47,718 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:47,718 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:47,718 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:50,114 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 99 字符
+2026-06-02 12:12:50,114 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:50,114 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:50,114 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:52,588 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:52,588 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:52,588 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:52,592 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:54,990 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:12:54,990 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:54,990 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:12:54,990 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:56,901 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 52 字符
+2026-06-02 12:12:56,901 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:56,903 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:56,903 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:12:59,230 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 130 字符
+2026-06-02 12:12:59,230 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:12:59,230 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:12:59,230 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:01,312 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:13:01,312 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:01,312 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:13:01,312 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:03,376 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:13:03,376 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:03,376 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:13:03,376 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:05,861 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 37 字符
+2026-06-02 12:13:05,865 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:05,865 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:05,865 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:11,196 - app.agents.sql.sql_generation_node - WARNING - SQL 生成失败，返回 INVALID_SQL
+2026-06-02 12:13:11,200 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:11,200 - app.agents.critic.critic_node - WARNING - Critic 审查终止：没有可审查的 SQL
+2026-06-02 12:13:11,200 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:13,784 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 120 字符
+2026-06-02 12:13:13,784 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:13,784 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:13,784 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:15,890 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 172 字符
+2026-06-02 12:13:15,895 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:15,895 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:15,895 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:17,986 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 74 字符
+2026-06-02 12:13:17,986 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:17,986 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:17,990 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:19,883 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 105 字符
+2026-06-02 12:13:19,883 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:19,883 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:19,883 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:21,686 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 32 字符
+2026-06-02 12:13:21,686 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:21,686 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:21,690 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:24,271 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 114 字符
+2026-06-02 12:13:24,275 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:24,275 - app.agents.critic.critic_node - WARNING - 第一层校验失败：只允许 SELECT 查询语句
+2026-06-02 12:13:24,275 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 你好...
+2026-06-02 12:13:26,655 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 219 字符
+2026-06-02 12:13:26,655 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 12:13:36,575 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=用户问题为简单打招呼，sql 语法正确且与 schema 一致，返回了质量检验知识库的基本统计信息（客户数、项目数、文档数）。sql 能正常执行，虽然不是直接回答
+2026-06-02 12:13:36,580 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-06-02 12:13:36,689 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据，0 个 PDF 文件
+2026-06-02 12:13:36,689 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-06-02 12:13:36,689 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-06-02 12:13:36,689 - app.agents.result.result_aggregation_node - INFO - Critic feedback: 用户问题为简单打招呼，sql 语法正确且与 schema 一致，返回了质量检验知识库的基本统计信息（客户数、项目数、文档数）。sql 能正常执行，虽然不是直接回答
+2026-06-02 12:13:36,689 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-06-02 12:13:36,689 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-06-02 12:13:36,689 - app.agents.result.response_optimization_node - WARNING - LLM 优化失败，使用原始回复: '"inspection_item"'
+2026-06-02 12:13:36,689 - app.agents.result.response_optimization_node - INFO - Response Optimization 完成，优化后回复长度: 95 字符
+2026-06-02 16:07:12,747 - app.agents.coordinator.coordinator_node - INFO - Coordinator 开始处理问题: 比亚迪前横梁外观检测的标准是什么...
+2026-06-02 16:07:27,680 - app.agents.coordinator.coordinator_node - INFO - 意图解析完成: intent=QueryIntent.DATABASE_QUERY, use_sql=True, use_rag=False
+2026-06-02 16:07:27,680 - app.agents.sql.sql_generation_node - INFO - SQL Generation 开始处理问题: 比亚迪前横梁外观检测的标准是什么...
+2026-06-02 16:07:31,985 - app.agents.sql.sql_generation_node - INFO - SQL 生成成功，长度: 221 字符
+2026-06-02 16:07:31,985 - app.agents.critic.critic_node - INFO - Critic 开始审查 SQL
+2026-06-02 16:07:46,017 - app.agents.critic.critic_node - INFO - LLM 语义校验完成：is_valid=True, needs_regeneration=False, feedback=sql 逻辑正确，能够回答用户问题。查询通过 customer=
+2026-06-02 16:07:46,017 - app.agents.sql.sql_execution_node - INFO - SQL Execution 开始执行 SQL
+2026-06-02 16:07:46,052 - app.agents.sql.sql_execution_node - INFO - SQL 执行成功，返回 1 条数据，1 个 PDF 文件
+2026-06-02 16:07:46,052 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 开始汇总结果
+2026-06-02 16:07:46,052 - app.agents.result.result_aggregation_node - INFO - SQL result: success=True, count=1
+2026-06-02 16:07:46,052 - app.agents.result.result_aggregation_node - INFO - Critic feedback: sql 逻辑正确，能够回答用户问题。查询通过 customer=
+2026-06-02 16:07:46,052 - app.agents.result.result_aggregation_node - INFO - Result Aggregation 完成，回复已记录到记忆系统
+2026-06-02 16:07:46,052 - app.agents.result.response_optimization_node - INFO - Response Optimization 开始优化回复
+2026-06-02 16:07:46,052 - app.agents.result.response_optimization_node - WARNING - LLM 优化失败，使用原始回复: '"inspection_item"'
+2026-06-02 16:07:46,052 - app.agents.result.response_optimization_node - INFO - Response Optimization 完成，优化后回复长度: 117 字符
