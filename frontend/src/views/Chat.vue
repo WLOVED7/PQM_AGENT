@@ -35,8 +35,10 @@
       </div>
 
       <div class="input-box">
-        <input v-model="question" placeholder="输入你的问题..." @keypress.enter="sendMessage">
-        <button @click="sendMessage" :disabled="isLoading">发送</button>
+        <input v-model="question" placeholder="输入你的问题..." @keypress.enter="sendMessage" :disabled="isLoading">
+        <button v-if="isLoading" class="btn-danger" @click="stopMessage">⏸ 停止</button>
+        <button v-else-if="lastCanceled" class="btn-secondary" @click="resumeLast">▶ 继续上次</button>
+        <button v-if="!isLoading" @click="sendMessage">发送</button>
       </div>
     </div>
   </div>
@@ -48,7 +50,7 @@ import { useChatStore } from '../store/chat'
 import { storeToRefs } from 'pinia'
 
 const chatStore = useChatStore()
-const { messages, isLoading } = storeToRefs(chatStore)
+const { messages, isLoading, lastCanceled } = storeToRefs(chatStore)
 
 const question = ref('')
 const sessionId = ref('user-001')
@@ -59,6 +61,16 @@ async function sendMessage() {
   const q = question.value
   question.value = ''
   await chatStore.sendMessage(q)
+  await nextTick()
+  chatBox.value.scrollTop = chatBox.value.scrollHeight
+}
+
+async function stopMessage() {
+  await chatStore.cancelCurrent()
+}
+
+async function resumeLast() {
+  await chatStore.resumeLast()
   await nextTick()
   chatBox.value.scrollTop = chatBox.value.scrollHeight
 }
