@@ -47,9 +47,7 @@ async def sql_execution_node(state: AgentState) -> AgentState:
     if not generated_sql:
         logger.error("SQL Execution 终止：没有可执行的 SQL")
         return {
-            **state,
             "sql": {
-                **state.get("sql", {}),
                 "sql_result": None,
                 "sql_error": "没有可执行的 SQL",
             },
@@ -64,9 +62,7 @@ async def sql_execution_node(state: AgentState) -> AgentState:
     except SQLValidationError as e:
         logger.error(f"SQL 校验失败：{e}")
         return {
-            **state,
             "sql": {
-                **state.get("sql", {}),
                 "sql_result": None,
                 "sql_error": f"SQL 校验失败: {str(e)}",
             },
@@ -103,9 +99,7 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         logger.error(f"SQL 执行失败：{e}")
 
     return {
-        **state,
         "sql": {
-            **state.get("sql", {}),
             "sql_result": result if result["success"] else None,
             "sql_error": result.get("error"),
         },

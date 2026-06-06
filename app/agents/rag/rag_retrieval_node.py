@@ -43,9 +43,7 @@ async def rag_retrieval_node(state: AgentState) -> AgentState:
         logger.info(f"RAG 检索完成，结果长度: {len(result)} 字符")
 
         return {
-            **state,
             "rag": {
-                **state.get("rag", {}),
                 "retrieved_docs": [],
                 "answer": result,
             },
@@ -55,9 +53,7 @@ async def rag_retrieval_node(state: AgentState) -> AgentState:
     except Exception as e:
         logger.error(f"RAG 检索失败: {e}")
         return {
-            **state,
             "rag": {
-                **state.get("rag", {}),
                 "retrieved_docs": [],
                 "answer": f"RAG 检索失败: {str(e)}",
             },

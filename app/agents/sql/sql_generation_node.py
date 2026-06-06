@@ -13,7 +13,7 @@ SQL Generation Node (agents/sql/sql_generation_node.py)
 question → LLM 生成 SQL → 返回 generated_sql
 
 【感知/理解/执行】
-- 感知: 接收 question, session_history
+- 感知: 接收 question, session 历史
 - 理解: 结合 Schema 上下文理解查询需求
 - 执行: 调用 LLM 生成 SELECT SQL
 """
@@ -86,7 +86,7 @@ async def sql_generation_node(state: AgentState) -> AgentState:
     """
     SQL 生成 Node (Agent)
 
-    【感知】接收 question, session_history
+    【感知】接收 question, session 历史
     【理解】结合 Schema 上下文理解查询需求
     【执行】调用 LLM 生成 SQL
 
@@ -135,21 +135,15 @@ async def sql_generation_node(state: AgentState) -> AgentState:
     if sql == "INVALID_SQL" or not sql:
         logger.warning("SQL 生成失败，返回 INVALID_SQL")
         return {
-            **state,
             "sql": {
-                **state.get("sql", {}),
                 "generated_sql": None,
-                "error": "无法为该问题生成有效的 SQL",
+                "sql_error": "无法为该问题生成有效的 SQL",
             },
             "current_step": WorkflowStep.SQL_GENERATION,
         }
 
     logger.info(f"SQL 生成成功，长度: {len(sql)} 字符")
     return {
-        **state,
-        "sql": {
-            **state.get("sql", {}),
-            "generated_sql": sql,
-        },
+        "sql": {"generated_sql": sql},
         "current_step": WorkflowStep.SQL_GENERATION,
     }

@@ -79,7 +79,7 @@ async def coordinator_node(state: AgentState) -> AgentState:
     【执行】设置 use_sql/use_rag 决定后续工作流
 
     Args:
-        state: AgentState，包含 question 和 session_history
+        state: AgentState，包含 question 和 session_id
 
     Returns:
         更新后的 state，包含 intent, use_sql, use_rag
@@ -120,10 +120,8 @@ async def coordinator_node(state: AgentState) -> AgentState:
     session_memory.add_message(session_id, "user", question)
 
     return {
-        **state,
         "intent": intent,
         "global_context": {
-            **state.get("global_context", {}),
             "use_sql": use_sql,
             "use_rag": use_rag,
         },

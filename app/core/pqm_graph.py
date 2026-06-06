@@ -71,6 +71,40 @@ from app.agents.critic.critic_node import critic_node
 from app.agents.rag.rag_retrieval_node import rag_retrieval_node
 from app.agents.result.result_aggregation_node import result_aggregation_node
 from app.agents.result.response_optimization_node import response_optimization_node
+from app.utils.logger import get_logger
+
+import functools
+import json
+
+
+# ===== 节点 IO 日志 =====
+_io_logger = get_logger("app.graph.io")
+
+# 节点返回的 state 中，仅这些键会被记录（避免打印巨大的全量 state）
+_LOG_KEYS = ("intent", "current_step", "sql", "rag", "validation", "result", "global_context", "retry_exhausted", "error")
+
+
+def _truncate(s: str, n: int = 1000) -> str:
+    return s if len(s) <= n else s[:n] + f"... (截断, 共 {len(s)} 字符)"
+
+
+def with_io_logging(name: str, fn):
+    """包装 node 函数，在退出时记录节点输出到 app.graph.io logger。"""
+    @functools.wraps(fn)
+    async def wrapped(state):
+        try:
+            result = await fn(state)
+        except Exception:
+            _io_logger.exception(f"[{name}] ✖ EXCEPTION")
+            raise
+        delta = {k: result[k] for k in _LOG_KEYS if k in result}
+        try:
+            payload = json.dumps(delta, ensure_ascii=False, default=str)
+        except (TypeError, ValueError):
+            payload = repr(delta)
+        _io_logger.info(f"[{name}] ◀ OUTPUT {_truncate(payload)}")
+        return result
+    return wrapped
 
 
 # ===== 检查点存储 =====
@@ -104,13 +138,13 @@ def create_pqm_graph(checkpointer: MemorySaver = None) -> StateGraph:
     graph = StateGraph(AgentState)
 
     # ===== 注册节点 =====
-    graph.add_node("coordinator", coordinator_node)
-    graph.add_node("sql_generation", sql_generation_node)
-    graph.add_node("critic", critic_node)
-    graph.add_node("sql_execution", sql_execution_node)
-    graph.add_node("rag_retrieval", rag_retrieval_node)
-    graph.add_node("result_aggregation", result_aggregation_node)
-    graph.add_node("response_optimization", response_optimization_node)
+    graph.add_node("coordinator", with_io_logging("coordinator", coordinator_node))
+    graph.add_node("sql_generation", with_io_logging("sql_generation", sql_generation_node))
+    graph.add_node("critic", with_io_logging("critic", critic_node))
+    graph.add_node("sql_execution", with_io_logging("sql_execution", sql_execution_node))
+    graph.add_node("rag_retrieval", with_io_logging("rag_retrieval", rag_retrieval_node))
+    graph.add_node("result_aggregation", with_io_logging("result_aggregation", result_aggregation_node))
+    graph.add_node("response_optimization", with_io_logging("response_optimization", response_optimization_node))
 
     # ===== 设置入口点 =====
     graph.set_entry_point("coordinator")

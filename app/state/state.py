@@ -16,7 +16,6 @@ LangGraph State 定义 (state/state.py)
 from typing import TypedDict, Annotated, Optional, Literal
 from enum import Enum
 
-from langgraph.graph import add_messages
 from app.state.reducers import merge_reducer
 
 
@@ -89,9 +88,6 @@ class AgentState(TypedDict):
     current_step: WorkflowStep
     global_context: Annotated[dict, merge_reducer]
 
-    # === 记忆系统 ===
-    session_history: Annotated[list[dict], add_messages]
-
     # === 业务域 ===
     sql: Annotated[SQLState, merge_reducer]
     rag: Annotated[RAGState, merge_reducer]
@@ -126,7 +122,6 @@ def create_initial_state(
         intent=QueryIntent.UNKNOWN,
         current_step=WorkflowStep.COORDINATOR,
         global_context={},
-        session_history=[],
         sql={
             "generated_sql": None,
             "sql_result": None,

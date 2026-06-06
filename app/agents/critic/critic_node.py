@@ -214,9 +214,7 @@ async def critic_node(state: AgentState) -> AgentState:
     if not generated_sql:
         logger.warning("Critic 审查终止：没有可审查的 SQL")
         return {
-            **state,
             "validation": {
-                **state.get("validation", {}),
                 "sql_valid": False,
                 "critic_feedback": "没有可审查的 SQL",
             },
@@ -232,9 +230,7 @@ async def critic_node(state: AgentState) -> AgentState:
     if not is_valid:
         logger.warning(f"第一层校验失败：{error}")
         return {
-            **state,
             "validation": {
-                **state.get("validation", {}),
                 "sql_valid": False,
                 "critic_feedback": f"安全校验失败: {error}",
             },
@@ -248,9 +244,7 @@ async def critic_node(state: AgentState) -> AgentState:
     if not is_valid:
         logger.warning(f"第二层校验失败：{error}")
         return {
-            **state,
             "validation": {
-                **state.get("validation", {}),
                 "sql_valid": False,
                 "critic_feedback": f"Schema 引用校验失败: {error}",
             },
@@ -268,13 +262,8 @@ async def critic_node(state: AgentState) -> AgentState:
         logger.warning(f"SQL 语义审查未通过：{semantic_result.get('feedback', '未知原因')}")
 
     return {
-        **state,
-        "sql": {
-            **state.get("sql", {}),
-            "retry_count": sql_domain.get("retry_count", 0) + 1,
-        },
+        "sql": {"retry_count": sql_domain.get("retry_count", 0) + 1},
         "validation": {
-            **state.get("validation", {}),
             "sql_valid": semantic_result["is_valid"],
             "critic_feedback": semantic_result["feedback"] or "SQL 审查完成",
         },

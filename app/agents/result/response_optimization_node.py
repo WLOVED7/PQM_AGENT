@@ -41,7 +41,7 @@ OPTIMIZATION_PROMPT = """你是质量检验知识库的回复优化专家。
 4. 如有多条结果，使用编号列表
 
 【示例】
-原始: {"inspection_item": "外观检验", "requirements": "[\"不允许有生锈\", \"不允许有开裂\"]"}
+原始: {{"inspection_item": "外观检验", "requirements": "[\"不允许有生锈\", \"不允许有开裂\"]"}}
 优化: **外观检验**：
 - 不允许有生锈
 - 不允许有开裂
@@ -86,11 +86,7 @@ async def response_optimization_node(state: AgentState) -> AgentState:
     # 如果原始结果已经是简洁的友好格式（无SQL数据，只有RAG或错误），直接返回
     if not sql_result or not sql_result.get("success"):
         return {
-            **state,
-            "result": {
-                **state.get("result", {}),
-                "final_response": raw_result,
-            },
+            "result": {"final_response": raw_result},
             "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
         }
 
@@ -119,11 +115,7 @@ async def response_optimization_node(state: AgentState) -> AgentState:
     logger.debug(f"最终回复: {optimized_response[:100]}...")
 
     return {
-        **state,
-        "result": {
-            **state.get("result", {}),
-            "final_response": optimized_response,
-        },
+        "result": {"final_response": optimized_response},
         "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
     }
 

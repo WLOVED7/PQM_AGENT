@@ -12,7 +12,7 @@ sql_result + rag_result → 汇总 → 最终回复 → 记录到记忆
 【感知/理解/执行】
 - 感知: 接收 sql_result, rag_result, sql_error, critic_feedback
 - 理解: 判断哪个结果可用，整合信息
-- 执行: 生成最终回复，记录到 session_history
+- 执行: 生成最终回复，记录到 session_memory
 """
 from typing import Dict, Any, Optional
 
@@ -56,13 +56,13 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
 
     【感知】接收 sql_result, rag_result, sql_error, critic_feedback
     【理解】判断哪个结果可用，整合信息
-    【执行】生成最终回复，记录到 session_history
+    【执行】生成最终回复，记录到 session_memory
 
     Args:
         state: AgentState
 
     Returns:
-        更新后的 state，包含最终回复（通过 session_history 传递）
+        更新后的 state，包含最终回复
     """
     logger.info("Result Aggregation 开始汇总结果")
 
@@ -107,11 +107,7 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
 
     # 存储原始回复供后续优化
     return {
-        **state,
-        "result": {
-            **state.get("result", {}),
-            "raw_response": final_response,
-        },
+        "result": {"raw_response": final_response},
         "current_step": WorkflowStep.RESULT_AGGREGATION,
     }
 
