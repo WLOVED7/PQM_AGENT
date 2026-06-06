@@ -24,6 +24,7 @@ class QueryIntent(str, Enum):
     DATABASE_QUERY = "database_query"
     DOCUMENT_SEARCH = "document_search"
     MIXED = "mixed"
+    META_HISTORY = "meta_history"
     UNKNOWN = "unknown"
 
 

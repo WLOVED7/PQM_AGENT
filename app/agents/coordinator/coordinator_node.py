@@ -27,10 +27,10 @@ COORDINATOR_PROMPT = """你是 PQM 质量检验知识库的 Coordinator Agent。
 
 【你的职责】
 1. 理解用户问题
-2. 判断用户意图：SQL查询 / RAG检索 / 混合
+2. 判断用户意图：SQL查询 / RAG检索 / 元问题 / 混合
 3. 决定后续工作流
 
-【两大方向判断】
+【三大方向判断】
 
 一、SQL数据库查询方向 (use_sql=True)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -59,15 +59,27 @@ COORDINATOR_PROMPT = """你是 PQM 质量检验知识库的 Coordinator Agent。
 - 问"为什么"、"发生原因"、"解决办法"、"异常处理"
 - 问"外观缺陷"、"性能异常"、"尺寸问题"等
 
+三、元问题方向 (intent=meta_history, use_sql=False, use_rag=False)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+目标：关于"对话本身"的问题，不需要查数据库也不需要检索知识库
+关键特征：询问对话历史、之前问过什么、你刚才说了什么
+
+典型问法：
+- "我上一个问题是什么？"
+- "我之前问了什么？"
+- "你刚才说了什么？"
+- "我们聊到哪了？"
+
 【判断规则】
-1. 问题包含"原因"、"解决"、"异常"、"缺陷" → RAG
-2. 问题包含具体客户/零件 + 检验项目(标准/方法/抽检) → SQL
-3. 问题既涉及具体零件检验，又涉及异常处理 → MIXED
-4. 无法判断时默认 SQL
+1. 问题是关于对话历史/上下文本身 → META_HISTORY (use_sql=false, use_rag=false)
+2. 问题包含"原因"、"解决"、"异常"、"缺陷" → RAG
+3. 问题包含具体客户/零件 + 检验项目(标准/方法/抽检) → SQL
+4. 问题既涉及具体零件检验，又涉及异常处理 → MIXED
+5. 无法判断时默认 SQL
 
 【输出格式】
 只输出以下 JSON 格式，不要其他内容：
-{"intent": "database_query|document_search|mixed|unknown", "use_sql": true|false, "use_rag": true|false}"""
+{"intent": "database_query|document_search|mixed|meta_history|unknown", "use_sql": true|false, "use_rag": true|false}"""
 
 
 async def coordinator_node(state: AgentState) -> AgentState:
@@ -145,8 +157,11 @@ def _parse_intent_response(response: str) -> tuple:
 
     response_lower = response.lower()
 
-    # 解析 intent
-    if "mixed" in response_lower:
+    # 解析 intent — 元问题优先识别
+    if "meta_history" in response_lower:
+        intent = QueryIntent.META_HISTORY
+        # use_sql 和 use_rag 都为 False，路由直接走 result_aggregation
+    elif "mixed" in response_lower:
         intent = QueryIntent.MIXED
         use_sql = True
         use_rag = True

@@ -214,6 +214,7 @@ async def critic_node(state: AgentState) -> AgentState:
     if not generated_sql:
         logger.warning("Critic 审查终止：没有可审查的 SQL")
         return {
+            "sql": {"retry_count": sql_domain.get("retry_count", 0) + 1},
             "validation": {
                 "sql_valid": False,
                 "critic_feedback": "没有可审查的 SQL",
@@ -230,6 +231,7 @@ async def critic_node(state: AgentState) -> AgentState:
     if not is_valid:
         logger.warning(f"第一层校验失败：{error}")
         return {
+            "sql": {"retry_count": sql_domain.get("retry_count", 0) + 1},
             "validation": {
                 "sql_valid": False,
                 "critic_feedback": f"安全校验失败: {error}",
@@ -244,6 +246,7 @@ async def critic_node(state: AgentState) -> AgentState:
     if not is_valid:
         logger.warning(f"第二层校验失败：{error}")
         return {
+            "sql": {"retry_count": sql_domain.get("retry_count", 0) + 1},
             "validation": {
                 "sql_valid": False,
                 "critic_feedback": f"Schema 引用校验失败: {error}",

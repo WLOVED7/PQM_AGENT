@@ -19,7 +19,7 @@ from typing import Dict, Any, Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agents.base.llm import create_chat_llm
-from app.state.state import AgentState, WorkflowStep
+from app.state.state import AgentState, WorkflowStep, QueryIntent
 from app.memory.short_term_memory import session_memory
 from app.utils.logger import get_logger
 
@@ -50,6 +50,22 @@ AGGREGATION_PROMPT = """你是质量检验知识库的回复聚合专家。
 如果 SQL 执行失败且 RAG 无结果，说明无法回答。"""
 
 
+META_HISTORY_PROMPT = """根据下面的对话历史，回答用户关于对话本身的问题。
+
+【对话历史】
+{history}
+
+【用户当前问题】
+{question}
+
+【回答要求】
+- 准确引用历史中的内容
+- 简洁明了
+- 如果历史不足以回答，说明"目前是本次对话的第一个问题"或类似话术
+
+直接输出回答，不要其他内容。"""
+
+
 async def result_aggregation_node(state: AgentState) -> AgentState:
     """
     Result Aggregation Node
@@ -57,12 +73,6 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     【感知】接收 sql_result, rag_result, sql_error, critic_feedback
     【理解】判断哪个结果可用，整合信息
     【执行】生成最终回复，记录到 session_memory
-
-    Args:
-        state: AgentState
-
-    Returns:
-        更新后的 state，包含最终回复
     """
     logger.info("Result Aggregation 开始汇总结果")
 
@@ -75,41 +85,82 @@ async def result_aggregation_node(state: AgentState) -> AgentState:
     rag_result = rag_domain.get("answer")
     critic_feedback = validation_domain.get("critic_feedback")
     session_id = state["session_id"]
+    intent = state.get("intent")
 
-    # 记录各状态信息
-    if sql_result:
-        logger.info(f"SQL result: success={sql_result.get('success')}, count={sql_result.get('count', 0)}")
+    # 元问题路径：直接用对话历史回答
+    if intent == QueryIntent.META_HISTORY:
+        logger.info("META_HISTORY 路径：使用对话历史生成回复")
+        final_response = _answer_meta_question(question, session_id)
     else:
-        logger.info("SQL result: None")
-    if sql_error:
-        logger.warning(f"SQL error: {sql_error}")
-    if rag_result:
-        logger.info(f"RAG result: {rag_result[:50]}...")
-    if critic_feedback:
-        logger.info(f"Critic feedback: {critic_feedback}")
+        # 记录各状态信息
+        if sql_result:
+            logger.info(f"SQL result: success={sql_result.get('success')}, count={sql_result.get('count', 0)}")
+        else:
+            logger.info("SQL result: None")
+        if sql_error:
+            logger.warning(f"SQL error: {sql_error}")
+        if rag_result:
+            logger.info(f"RAG result: {rag_result[:50]}...")
+        if critic_feedback:
+            logger.info(f"Critic feedback: {critic_feedback}")
 
-    # 生成最终回复
-    logger.debug("调用 _generate_final_response 生成回复...")
-    final_response = _generate_final_response(
-        question=question,
-        sql_result=sql_result,
-        sql_error=sql_error,
-        rag_result=rag_result,
-        critic_feedback=critic_feedback,
-        retry_exhausted=state.get("retry_exhausted", False),
-        max_retries=state.get("max_retries", 2),
-    )
+        # 生成最终回复
+        logger.debug("调用 _generate_final_response 生成回复...")
+        final_response = _generate_final_response(
+            question=question,
+            sql_result=sql_result,
+            sql_error=sql_error,
+            rag_result=rag_result,
+            critic_feedback=critic_feedback,
+            retry_exhausted=state.get("retry_exhausted", False),
+            max_retries=state.get("max_retries", 2),
+        )
     logger.debug(f"生成的回复长度: {len(final_response)} 字符")
 
     # 记录到记忆系统
     session_memory.add_message(session_id, "assistant", final_response)
     logger.info("Result Aggregation 完成，回复已记录到记忆系统")
 
-    # 存储原始回复供后续优化
     return {
         "result": {"raw_response": final_response},
         "current_step": WorkflowStep.RESULT_AGGREGATION,
     }
+
+
+def _answer_meta_question(question: str, session_id: str) -> str:
+    """
+    回答关于对话历史的元问题。
+
+    当前问题已被 coordinator 写入 session_memory，所以历史中最后一条 user 就是当前问题。
+    LLM 需要识别这一点。
+    """
+    history = session_memory.get_history(session_id, limit=20)
+
+    if len(history) <= 1:
+        # 只有当前问题在历史里，没有更早的对话
+        return "这是本次对话的第一个问题，暂无更早的对话历史。"
+
+    lines = []
+    for msg in history:
+        role_label = "用户" if msg["role"] == "user" else "助手"
+        lines.append(f"{role_label}: {msg['content']}")
+    history_str = "\n".join(lines)
+
+    llm = create_chat_llm()
+    prompt = META_HISTORY_PROMPT.format(history=history_str, question=question)
+    messages = [
+        SystemMessage(content="你是一个对话助手，擅长回答关于对话历史的问题。"),
+        HumanMessage(content=prompt),
+    ]
+    try:
+        return llm.invoke(messages).strip()
+    except Exception as e:
+        logger.warning(f"元问题 LLM 调用失败，使用回退方案: {e}")
+        # 回退：直接取倒数第二条 user 消息（"上一个问题"）
+        user_msgs = [m for m in history if m["role"] == "user"]
+        if len(user_msgs) >= 2:
+            return f"您上一个问题是：{user_msgs[-2]['content']}"
+        return "暂无历史问题。"
 
 
 def _generate_final_response(
