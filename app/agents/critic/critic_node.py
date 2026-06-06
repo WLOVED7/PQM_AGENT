@@ -18,7 +18,7 @@ Critic Agent - SQL 质量审查 (agents/critic/critic_node.py)
 【感知/理解/执行】
 - 感知: 接收 question 和 generated_sql
 - 理解: 验证 SQL 语法、语义、安全性
-- 执行: 返回 sql_is_valid, critic_feedback, needs_regeneration
+- 执行: 返回 sql_valid, critic_feedback, needs_regeneration
 """
 from typing import Optional
 
@@ -156,39 +156,37 @@ def _parse_critic_response(response: str) -> dict:
     Returns:
         {"is_valid": bool, "feedback": str, "needs_regeneration": bool}
     """
+    import json
+    import re
+
     result = {
         "is_valid": False,
         "feedback": "",
         "needs_regeneration": False,
     }
 
+    # 优先尝试提取并解析完整 JSON 对象
+    json_match = re.search(r'\{.*\}', response, re.DOTALL)
+    if json_match:
+        try:
+            parsed = json.loads(json_match.group(0))
+            result["is_valid"] = bool(parsed.get("is_valid", False))
+            result["needs_regeneration"] = bool(parsed.get("needs_regeneration", False))
+            result["feedback"] = str(parsed.get("feedback", "")).strip()
+            return result
+        except (json.JSONDecodeError, ValueError, TypeError) as e:
+            logger.debug(f"JSON 解析失败，降级到字符串匹配: {e}")
+
+    # Fallback: 字符串匹配（兼容 LLM 返回不规范 JSON 的情况）
     response_lower = response.lower()
+    if '"is_valid": true' in response_lower or "'is_valid': true" in response_lower:
+        result["is_valid"] = True
+    if '"needs_regeneration": true' in response_lower or "'needs_regeneration': true" in response_lower:
+        result["needs_regeneration"] = True
 
-    # 解析 is_valid
-    if "is_valid" in response_lower:
-        # 检查是否明确包含 false
-        if '"is_valid": false' in response_lower or "'is_valid': false" in response_lower:
-            result["is_valid"] = False
-        elif '"is_valid": true' in response_lower or "'is_valid': true" in response_lower:
-            result["is_valid"] = True
-        else:
-            # 假设有 is_valid 关键字就是 true
-            result["is_valid"] = True
-
-    # 解析 needs_regeneration
-    if "needs_regeneration" in response_lower:
-        if '"needs_regeneration": true' in response_lower or "'needs_regeneration': true" in response_lower:
-            result["needs_regeneration"] = True
-        else:
-            result["needs_regeneration"] = False
-
-    # 提取 feedback（简单方法：取 JSON 部分之后的文本）
-    if "feedback" in response_lower:
-        # 尝试提取 feedback 的值
-        import re
-        match = re.search(r'feedback["\']?\s*:\s*["\']?([^"\'}]+)', response_lower)
-        if match:
-            result["feedback"] = match.group(1).strip()
+    fb_match = re.search(r'feedback["\']?\s*:\s*["\']([^"\']+)["\']', response)
+    if fb_match:
+        result["feedback"] = fb_match.group(1).strip()
 
     return result
 
@@ -205,7 +203,7 @@ async def critic_node(state: AgentState) -> AgentState:
         state: AgentState
 
     Returns:
-        更新后的 state，包含 sql_is_valid, critic_feedback, needs_regeneration
+        更新后的 state，包含 sql_valid, critic_feedback, needs_regeneration
     """
     logger.info("Critic 开始审查 SQL")
     question = state["question"]

@@ -48,7 +48,6 @@ class SQLState(TypedDict):
     sql_result: Optional[dict]
     sql_error: Optional[str]
     retry_count: int
-    sql_is_valid: bool
 
 
 class RAGState(TypedDict):
@@ -133,7 +132,6 @@ def create_initial_state(
             "sql_result": None,
             "sql_error": None,
             "retry_count": 0,
-            "sql_is_valid": False,
         },
         rag={
             "retrieved_docs": None,

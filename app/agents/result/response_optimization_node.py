@@ -85,8 +85,6 @@ async def response_optimization_node(state: AgentState) -> AgentState:
 
     # 如果原始结果已经是简洁的友好格式（无SQL数据，只有RAG或错误），直接返回
     if not sql_result or not sql_result.get("success"):
-        logger.info("跳过 LLM 优化，使用原始回复")
-        logger.debug(f"原始回复: {raw_result[:100]}...")
         return {
             **state,
             "result": {
@@ -132,18 +130,16 @@ async def response_optimization_node(state: AgentState) -> AgentState:
 
 def _format_row_for_display(row: dict) -> str:
     """格式化行数据为易读字符串"""
+    import json
     parts = []
     for key, value in row.items():
         if value is None:
             continue
-        # JSON 字符串解析
         if isinstance(value, str) and value.startswith('['):
             try:
-                import json
                 value = json.loads(value)
-            except:
+            except (json.JSONDecodeError, ValueError):
                 pass
-        # 格式化
         if isinstance(value, list):
             value = ' | '.join(str(v) for v in value)
         parts.append(f"{key}: {value}")

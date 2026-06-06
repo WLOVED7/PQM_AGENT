@@ -20,7 +20,7 @@ PQM LangGraph 主图 (core/pqm_graph.py)
 - coordinator → rag_retrieval (use_rag=True & not use_sql)
 - coordinator → result_aggregation (unknown intent)
 - sql_generation → critic
-- critic → sql_execution (sql_is_valid=True)
+- critic → sql_execution (sql_valid=True)
 - critic → sql_generation (needs_regeneration & retry_count < max)
 - critic → result_aggregation (retry exhausted)
 - sql_execution → result_aggregation
@@ -39,7 +39,7 @@ PQM LangGraph 主图 (core/pqm_graph.py)
                              │
               ┌──────────────┴──────────────┐
               │                             │
-        sql_is_valid=True          needs_regeneration=True
+        sql_valid=True          needs_regeneration=True
               │                             │
               ▼                             ▼
     ┌─────────────────┐      ┌─────────────────────────┐

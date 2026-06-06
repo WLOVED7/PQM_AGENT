@@ -5,12 +5,11 @@
 
 提供 LangGraph 状态合并的 reducer 函数。
 """
-from copy import deepcopy
 
 
 def merge_reducer(current: dict | None, update: dict | None) -> dict:
     """
-    合并 reducer - 深度合并而非覆盖
+    合并 reducer - 浅合并，update 覆盖 current 的同名键
 
     Args:
         current: 当前状态字典
@@ -19,10 +18,4 @@ def merge_reducer(current: dict | None, update: dict | None) -> dict:
     Returns:
         合并后的状态字典
     """
-    if current is None:
-        current = {}
-    if update is None:
-        update = {}
-    result = deepcopy(current)
-    result.update(update)
-    return result
+    return {**(current or {}), **(update or {})}

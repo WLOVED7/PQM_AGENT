@@ -106,7 +106,6 @@ async def coordinator_node(state: AgentState) -> AgentState:
     # 调用 LLM 判断意图
     logger.debug("调用 LLM 进行意图识别...")
     response = llm.invoke(messages)
-    print(f"---llm执行结果{response}---")
     response_text = response.strip() if response else ""
     logger.debug(f"LLM 意图识别结果: {response_text[:100]}")
 

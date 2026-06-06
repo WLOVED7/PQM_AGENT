@@ -58,25 +58,6 @@ async def sql_execution_node(state: AgentState) -> AgentState:
 
     logger.debug(f"执行的 SQL: {generated_sql[:100]}...")
 
-    # 确保 SQL SELECT 中包含 document_id（用于拼接 PDF 链接）
-    sql_upper = generated_sql.upper()
-    if "DOCUMENT_ID" not in sql_upper or "D.DOCUMENT_ID" not in sql_upper:
-        # 如果 SELECT 里没有 document_id，尝试添加
-        if "SELECT" in sql_upper and "DOCUMENT_ID" not in sql_upper:
-            # 在 SELECT 后、第一个 FROM 前插入 d.document_id
-            import re
-            match = re.search(r'(SELECT\s+)(.*?)(\s+FROM)', generated_sql, re.IGNORECASE)
-            if match:
-                original_fields = match.group(2)
-                # 如果 SELECT 不是 *，追加 document_id
-                if original_fields.strip() != '*':
-                    modified_sql = generated_sql.replace(
-                        match.group(0),
-                        match.group(1) + original_fields + ', d.document_id' + match.group(3)
-                    )
-                    generated_sql = modified_sql
-                    logger.debug(f"已添加 document_id 到查询: {generated_sql[:100]}...")
-
     # 再次校验 SQL（安全双保险）
     try:
         _validator.validate_and_sanitize(generated_sql)
