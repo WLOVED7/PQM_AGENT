@@ -26,13 +26,12 @@ class Settings(BaseSettings):
 
     # ===== 数据库配置 =====
     DB_HOST: str = ""
-    DB_PORT: int = 3306
+    DB_PORT: int = 5432
     DB_USER: str = ""
     DB_PASSWORD: str = ""
     DB_NAME: str = ""
-    DB_CHARSET: str = "utf8mb4"
 
-    # ===== 异步引擎配置 =====
+    # ===== 连接池配置 =====
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_TIMEOUT: int = 30
@@ -61,11 +60,9 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:
-        """异步数据库URL"""
         return (
-            f"mysql+aiomysql://{self.DB_USER}:{self.DB_PASSWORD}"
+            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-            f"?charset={self.DB_CHARSET}"
         )
 
 
