@@ -78,7 +78,7 @@ class RagFlowClient:
         """
         try:
             payload = {
-                "query": query,
+                "question": query,
                 "top_k": top_k,
                 "highlight": True,
             }
@@ -88,8 +88,13 @@ class RagFlowClient:
 
             response = await self.client.post("/api/v1/retrieval", json=payload)
             response.raise_for_status()
-            result = response.json()
+            resp = response.json()
 
+            if resp.get("code") != 0:
+                logger.error(f"RagFlow 检索错误: code={resp.get('code')} {resp.get('message')}")
+                return {"error": resp.get("message", "unknown error"), "chunks": [], "answer": ""}
+
+            result = resp.get("data", {}) if isinstance(resp.get("data"), dict) else {}
             logger.info(f"RagFlow 检索完成，问题: {query[:50]}..., 结果数: {len(result.get('chunks', []))}")
             return result
 

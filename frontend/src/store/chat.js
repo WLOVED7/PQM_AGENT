@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { marked } from 'marked'
 import { chatApi } from '../api/chat'
+
+marked.setOptions({ breaks: true })
+
+function renderMarkdown(text) {
+  return marked.parse(text || '')
+}
 
 export const useChatStore = defineStore('chat', {
   state: () => ({
@@ -20,7 +27,7 @@ export const useChatStore = defineStore('chat', {
         this.messages.push({ role: 'assistant', content: `❌ 错误: ${data.error}`, isError: true })
         return
       }
-      let answer = data.answer || ''
+      let answer = renderMarkdown(data.answer || '')
       if (data.pdf_urls && data.pdf_urls.length > 0) {
         const pdfs = data.pdf_urls.map(url =>
           `<a href="http://localhost:8000/${url}" target="_blank">📥 ${url}</a>`
