@@ -44,6 +44,7 @@ class RagFlowClient:
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
             },
+            trust_env=False,
         )
 
     async def close(self):
@@ -99,7 +100,7 @@ class RagFlowClient:
             return result
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"RagFlow HTTP 错误: {e.response.status_code}")
+            logger.error(f"RagFlow HTTP 错误: {e.response.status_code}, body: {e.response.text[:500]}")
             return {"error": f"HTTP {e.response.status_code}", "chunks": [], "answer": ""}
         except Exception as e:
             logger.error(f"RagFlow 检索失败: {e}")

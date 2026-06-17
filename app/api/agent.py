@@ -31,6 +31,7 @@ from typing import Optional, List, Dict, Any
 
 from app.core.pqm_graph import run_pqm_graph, pqm_graph
 from app.memory.short_term_memory import session_memory
+from app.api.monitor import increment_query_count
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -166,6 +167,7 @@ async def query(request: QueryRequest):
             request.session_id,
             run_pqm_graph(question=request.question, session_id=request.session_id),
         )
+        increment_query_count()
         return _build_response(result, request.session_id, request.question)
     except asyncio.CancelledError:
         logger.info(f"Query cancelled for session {request.session_id}")

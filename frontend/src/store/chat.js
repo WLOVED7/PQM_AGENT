@@ -30,7 +30,7 @@ export const useChatStore = defineStore('chat', {
       let answer = renderMarkdown(data.answer || '')
       if (data.pdf_urls && data.pdf_urls.length > 0) {
         const pdfs = data.pdf_urls.map(url =>
-          `<a href="http://localhost:8000/${url}" target="_blank">📥 ${url}</a>`
+          `<a href="/${url}" target="_blank">📥 ${url}</a>`
         ).join('')
         answer += `<div class="pdf-links">📄 相关文档: ${pdfs}</div>`
       }
