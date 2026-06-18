@@ -27,10 +27,10 @@ COORDINATOR_PROMPT = """你是 PQM 质量检验知识库的 Coordinator Agent。
 
 【你的职责】
 1. 理解用户问题
-2. 判断用户意图：SQL查询 / RAG检索 / 元问题 / 混合
+2. 判断用户意图：SQL查询 / RAG检索 / 元问题 / 混合 / 通用回答
 3. 决定后续工作流
 
-【三大方向判断】
+【四大方向判断】
 
 一、SQL数据库查询方向 (use_sql=True)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -70,16 +70,29 @@ COORDINATOR_PROMPT = """你是 PQM 质量检验知识库的 Coordinator Agent。
 - "你刚才说了什么？"
 - "我们聊到哪了？"
 
+四、通用回答方向 (intent=general_llm, use_sql=False, use_rag=False)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+目标：直接用 LLM 知识回答，不需要查数据库或知识库
+关键特征：通用知识、概念解释、方法论、闲聊、与质检系统无关的一般性问题
+
+典型问法：
+- "什么是 AQL？"（解释概念，不查具体数据）
+- "SIP 是什么意思？"
+- "你好"、"谢谢"等闲聊
+- "帮我分析一下这段文字…"
+- 任何明显无法通过数据库或知识库回答的问题
+
 【判断规则】
 1. 问题是关于对话历史/上下文本身 → META_HISTORY (use_sql=false, use_rag=false)
 2. 问题包含"原因"、"解决"、"异常"、"缺陷" → RAG
 3. 问题包含具体客户/零件 + 检验项目(标准/方法/抽检) → SQL
 4. 问题既涉及具体零件检验，又涉及异常处理 → MIXED
-5. 无法判断时默认 SQL
+5. 通用知识/概念/闲聊，无需查库 → GENERAL_LLM
+6. 无法判断时 → GENERAL_LLM（不要强行走 SQL）
 
 【输出格式】
 只输出以下 JSON 格式，不要其他内容：
-{"intent": "database_query|document_search|mixed|meta_history|unknown", "use_sql": true|false, "use_rag": true|false}"""
+{"intent": "database_query|document_search|mixed|meta_history|general_llm|unknown", "use_sql": true|false, "use_rag": true|false}"""
 
 
 async def coordinator_node(state: AgentState) -> AgentState:
@@ -126,7 +139,9 @@ async def coordinator_node(state: AgentState) -> AgentState:
 
     logger.info(f"意图解析完成: intent={intent}, use_sql={use_sql}, use_rag={use_rag}")
     if intent == QueryIntent.UNKNOWN:
-        logger.warning("无法识别意图，默认使用 SQL 查询")
+        logger.warning("无法识别意图，已路由到通用 LLM 兜底")
+    if intent == QueryIntent.GENERAL_LLM:
+        logger.info("通用问题，走 LLM 直接回答")
 
     # 更新记忆 - 记录用户问题
     session_memory.add_message(session_id, "user", question)
@@ -171,9 +186,10 @@ def _parse_intent_response(response: str) -> tuple:
     elif "database_query" in response_lower:
         intent = QueryIntent.DATABASE_QUERY
         use_sql = True
+    elif "general_llm" in response_lower:
+        intent = QueryIntent.GENERAL_LLM
     else:
-        # 默认走 SQL 查询
-        intent = QueryIntent.DATABASE_QUERY
-        use_sql = True
+        # 无法识别时走通用 LLM 兜底，不强行走 SQL
+        intent = QueryIntent.GENERAL_LLM
 
     return intent, use_sql, use_rag

@@ -28,7 +28,7 @@
               <div class="loading-dot"></div>
               <div class="loading-dot"></div>
               <div class="loading-dot"></div>
-              正在分析问题...
+              {{ thinkingLabel }}
             </div>
           </div>
         </div>
@@ -45,24 +45,30 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, watch } from 'vue'
 import { useChatStore } from '../store/chat'
 import { storeToRefs } from 'pinia'
 
 const chatStore = useChatStore()
-const { messages, isLoading, lastCanceled } = storeToRefs(chatStore)
+const { messages, isLoading, lastCanceled, thinkingLabel } = storeToRefs(chatStore)
 
 const question = ref('')
 const sessionId = ref('user-001')
 const chatBox = ref(null)
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight
+  })
+}
+
+watch(messages, scrollToBottom, { deep: true })
 
 async function sendMessage() {
   if (!question.value.trim() || isLoading.value) return
   const q = question.value
   question.value = ''
   await chatStore.sendMessage(q)
-  await nextTick()
-  chatBox.value.scrollTop = chatBox.value.scrollHeight
 }
 
 async function stopMessage() {
@@ -71,8 +77,6 @@ async function stopMessage() {
 
 async function resumeLast() {
   await chatStore.resumeLast()
-  await nextTick()
-  chatBox.value.scrollTop = chatBox.value.scrollHeight
 }
 
 function clearChat() {

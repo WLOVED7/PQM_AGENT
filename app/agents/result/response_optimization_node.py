@@ -69,26 +69,32 @@ async def response_optimization_node(state: AgentState) -> AgentState:
     question = state["question"]
     sql_domain = state.get("sql", {})
     rag_domain = state.get("rag", {})
+    result_domain = state.get("result", {})
     sql_result = sql_domain.get("sql_result")
     rag_result = rag_domain.get("answer")
     sql_error = sql_domain.get("sql_error")
     retry_exhausted = state.get("retry_exhausted", False)
 
-    # 构建原始结果描述
-    logger.debug("构建原始结果描述...")
+    # 非 SQL 成功路径：直接使用 result_aggregation 已生成的 raw_response
+    if not (sql_result and sql_result.get("success")):
+        raw_response = result_domain.get("raw_response") or _build_raw_result_description(
+            sql_result=sql_result,
+            rag_result=rag_result,
+            sql_error=sql_error,
+            retry_exhausted=retry_exhausted,
+        )
+        return {
+            "result": {"final_response": raw_response},
+            "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
+        }
+
+    # SQL 成功路径：构建原始数据描述，再用 LLM 润色
     raw_result = _build_raw_result_description(
         sql_result=sql_result,
         rag_result=rag_result,
         sql_error=sql_error,
         retry_exhausted=retry_exhausted,
     )
-
-    # 如果原始结果已经是简洁的友好格式（无SQL数据，只有RAG或错误），直接返回
-    if not sql_result or not sql_result.get("success"):
-        return {
-            "result": {"final_response": raw_result},
-            "current_step": WorkflowStep.RESPONSE_OPTIMIZATION,
-        }
 
     # 调用 LLM 优化（需转义 raw_result 中的花括号，防止 str.format() 误解析）
     logger.debug("调用 LLM 优化回复...")

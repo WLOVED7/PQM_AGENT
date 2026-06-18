@@ -24,12 +24,14 @@ Coordinator (意图识别) → SQL Agent / RAG Agent
                     Result Aggregation
 """
 import asyncio
+import json
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
-from app.core.pqm_graph import run_pqm_graph, pqm_graph
+from app.core.pqm_graph import run_pqm_graph, run_pqm_graph_stream, pqm_graph
 from app.memory.short_term_memory import session_memory
 from app.api.monitor import increment_query_count
 from app.utils.logger import get_logger
@@ -38,6 +40,16 @@ logger = get_logger(__name__)
 
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
+
+STEP_LABELS = {
+    "coordinator": "正在理解问题...",
+    "sql_generation": "正在生成查询语句...",
+    "critic": "正在审查 SQL...",
+    "sql_execution": "正在执行数据库查询...",
+    "rag_retrieval": "正在检索知识库...",
+    "result_aggregation": "正在整合结果...",
+    "response_optimization": "正在优化回复...",
+}
 
 
 # 同一 session 同时只能有一个运行中的 graph 任务
@@ -103,7 +115,7 @@ def _build_response(result: Dict[str, Any], session_id: str, question: str) -> Q
         data=sql_result.get("data") if sql_result else None,
         count=sql_result.get("count", 0) if sql_result else 0,
         error=sql_error,
-        answer=result_domain.get("final_response") or _build_answer(result),
+        answer=result_domain.get("final_response") or result_domain.get("raw_response") or _build_answer(result),
         pdf_urls=sql_result.get("pdf_urls", []) if sql_result else [],
     )
 
@@ -148,6 +160,83 @@ async def _run_with_registry(session_id: str, coro):
 # =============================================================================
 # API 端点
 # =============================================================================
+@router.post("/stream")
+async def stream_query(request: QueryRequest):
+    """流式查询接口（SSE）- 推送思考步骤 + 最终回复"""
+    await _cancel_existing_task(request.session_id)
+
+    session_id = request.session_id
+    question = request.question
+    queue: asyncio.Queue = asyncio.Queue()
+
+    async def _run():
+        config = {"configurable": {"thread_id": session_id}}
+        try:
+            async for chunk in run_pqm_graph_stream(question=question, session_id=session_id):
+                await queue.put(("thinking", chunk))
+            state_snapshot = pqm_graph.get_state(config)
+            await queue.put(("done", state_snapshot.values if state_snapshot else {}))
+        except asyncio.CancelledError:
+            await queue.put(("cancelled", None))
+        except Exception as e:
+            logger.error(f"Stream error: {e}")
+            await queue.put(("error", str(e)))
+
+    task = asyncio.create_task(_run())
+    _running_tasks[session_id] = task
+
+    async def generate():
+        try:
+            while True:
+                try:
+                    event_type, data = await asyncio.wait_for(queue.get(), timeout=120.0)
+                except asyncio.TimeoutError:
+                    yield f"data: {json.dumps({'type': 'error', 'error': '请求超时'}, ensure_ascii=False)}\n\n"
+                    break
+
+                if event_type == "thinking":
+                    for node_name in data.keys():
+                        label = STEP_LABELS.get(node_name, "处理中...")
+                        payload = json.dumps({"type": "thinking", "step": node_name, "label": label}, ensure_ascii=False)
+                        yield f"data: {payload}\n\n"
+
+                elif event_type == "done":
+                    response = _build_response(data, session_id, question)
+                    done_payload = json.dumps({
+                        "type": "done",
+                        "answer": response.answer,
+                        "intent": response.intent,
+                        "sql": response.sql,
+                        "data": response.data,
+                        "count": response.count,
+                        "pdf_urls": response.pdf_urls or [],
+                        "success": response.success,
+                        "cancelled": False,
+                    }, ensure_ascii=False)
+                    yield f"data: {done_payload}\n\n"
+                    break
+
+                elif event_type == "cancelled":
+                    yield f"data: {json.dumps({'type': 'done', 'cancelled': True, 'answer': '（已停止）'}, ensure_ascii=False)}\n\n"
+                    break
+
+                elif event_type == "error":
+                    yield f"data: {json.dumps({'type': 'error', 'error': data}, ensure_ascii=False)}\n\n"
+                    break
+        finally:
+            if _running_tasks.get(session_id) is task:
+                _running_tasks.pop(session_id, None)
+            if not task.done():
+                task.cancel()
+
+    increment_query_count()
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 @router.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest):
     """
