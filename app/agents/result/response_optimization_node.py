@@ -26,7 +26,7 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-OPTIMIZATION_PROMPT = """你是质量检验知识库的回复优化专家。
+OPTIMIZATION_PROMPT = """你是热压品质异常预测系统的回复优化专家。
 
 【原始问题】
 {question}
@@ -36,15 +36,20 @@ OPTIMIZATION_PROMPT = """你是质量检验知识库的回复优化专家。
 
 【你的任务】
 1. 将原始数据格式化为友好可读的回复
-2. JSON 数组格式化为列表展示
-3. 保持信息准确，简明扼要
-4. 如有多条结果，使用编号列表
+2. 保持信息准确，简明扼要
+3. 如有多条结果，使用编号列表
+4. 字段对应关系：
+   - inspection_item → 检验项
+   - specification   → 规范/描述
+   - inspection_method → 检验方法
+   - inspection_frequency → 检查频次
+   - version → 版本号
 
 【示例】
-原始: {{"inspection_item": "外观检验", "requirements": "[\"不允许有生锈\", \"不允许有开裂\"]"}}
+原始: {{"inspection_item": "外观检验", "specification": "表面无生锈、变形、划伤", "inspection_method": "目视"}}
 优化: **外观检验**：
-- 不允许有生锈
-- 不允许有开裂
+- 规范：表面无生锈、变形、划伤
+- 检验方法：目视
 
 【输出格式】
 直接输出优化后的回复，不要其他内容。"""
@@ -107,7 +112,7 @@ async def response_optimization_node(state: AgentState) -> AgentState:
         )
 
         messages = [
-            SystemMessage(content="你是一个专业的质量检验知识库助手，擅长将原始数据格式化为友好的回复。"),
+            SystemMessage(content="你是热压品质异常预测系统的专业助手，擅长将数据库查询结果格式化为友好的回复。"),
             HumanMessage(content=prompt),
         ]
 

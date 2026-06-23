@@ -72,7 +72,7 @@ class SQLValidator:
     ]
 
     # 允许的表（白名单）
-    ALLOWED_TABLES = {"documents", "inspection_items", "document_changes"}
+    ALLOWED_TABLES = {"sip_records"}
 
     def __init__(self, max_limit: int = 100, allowed_tables: set = None):
         """
@@ -157,6 +157,10 @@ class SQLValidator:
 
     def sanitize(self, sql: str) -> str:
         """清理 SQL（去除潜在危险内容）"""
+        # 剥除 markdown 代码块 ```sql ... ``` 或 ``` ... ```
+        sql = re.sub(r'^```(?:sql)?\s*\n?', '', sql.strip(), flags=re.IGNORECASE)
+        sql = re.sub(r'\n?```\s*$', '', sql.strip())
+
         # 去除注释
         sql = re.sub(r'--.*$', '', sql, flags=re.MULTILINE)
         sql = re.sub(r'/\*.*?\*/', '', sql, flags=re.DOTALL)
@@ -192,5 +196,5 @@ sql_validator = SQLValidator()
 if __name__ == "__main__":
     from app.utils.logger import get_logger
     logger = get_logger(__name__)
-    result = sql_validator.validate("SELECT * FROM documents LIMIT 10")
+    result = sql_validator.validate("SELECT * FROM sip_records LIMIT 10")
     logger.debug(f"Validation result: {result}")

@@ -4,23 +4,22 @@ Schema 加载器 + 字段同义词映射 (tools/schema_loader.py)
 =============================================================================
 
 【核心功能】
-1. 从数据库动态加载表结构
-2. 字段同义词映射（工业场景核心）
-3. 生成 SQL 所需的上下文
+1. 字段同义词映射（工业场景核心）
+2. 生成 SQL 所需的上下文
 
 【为什么需要同义词映射？】
-用户说："前横梁硬度标准是多少？"
-数据库字段是：inspection_item, requirements
+用户说："前横梁的厚度要求是多少？"
+数据库字段是：inspection_item, specification
 
 需要映射：
-  "硬度" → "inspection_item"
-  "标准" → "requirements"
+  "厚度" → "inspection_item"
+  "要求" → "specification"
 
 这是工业 Agent 的核心，不是让 LLM 自由发挥。
 """
 
 from typing import Dict, List, Optional, Any
-from app.db.schema import ALL_SCHEMAS, TABLE_RELATIONSHIPS
+from app.db.schema import ALL_SCHEMAS
 
 
 # =============================================================================
@@ -29,7 +28,12 @@ from app.db.schema import ALL_SCHEMAS, TABLE_RELATIONSHIPS
 # key: 用户可能说的词 -> value: 数据库实际字段名
 
 FIELD_SYNONYMS: Dict[str, str] = {
-    # -------- documents 表 --------
+    # -------- 文档头字段 --------
+
+    # 项目相关
+    "项目": "project",
+    "项目名称": "project",
+    "项目号": "project",
 
     # 客户相关
     "客户": "customer",
@@ -37,10 +41,12 @@ FIELD_SYNONYMS: Dict[str, str] = {
     "客户名称": "customer",
     "顾客": "customer",
 
-    # 项目相关
-    "项目": "project",
-    "项目名称": "project",
-    "项目号": "project",
+    # 文件/文档相关
+    "文档": "document_id",
+    "文档编号": "document_id",
+    "文件号": "document_id",
+    "文件编号": "document_id",
+    "SIP编号": "document_id",
 
     # 零件相关
     "零件": "part_name",
@@ -49,41 +55,50 @@ FIELD_SYNONYMS: Dict[str, str] = {
     "件号": "part_num",
     "件名": "part_name",
 
-    # 文档相关
-    "文档": "document_id",
-    "文档编号": "document_id",
-    "SIP": "document_type",
-    "SOP": "document_type",
-    "文档类型": "document_type",
+    # 模具相关
+    "模具": "mold_num",
+    "模具号": "mold_num",
+    "模具编号": "mold_num",
+
+    # 工序相关
+    "工序": "process",
+    "制程": "process",
+    "工艺": "process",
+    "加工工序": "process",
+    "工艺工序": "process",
+    # 常见工序名称（告知 LLM 这些词是 process 字段的值）
+    "来料": "process",
+    "来料检验": "process",
+    "热压": "process",
+    "热压工序": "process",
+    "镭射": "process",
+    "落料": "process",
 
     # 版本相关
     "版本": "version",
     "版本号": "version",
-    "图纸版本": "drawing_version",
 
-    # 状态相关
-    "状态": "status",
-    "是否有效": "status",
-    "有效": "status",
+    # -------- 检验项目字段 --------
 
-    # -------- inspection_items 表 --------
-
-    # 检验项目相关
+    # 检验项相关
     "检验项目": "inspection_item",
+    "检验项": "inspection_item",
     "检验名称": "inspection_item",
     "检验类型": "inspection_item",
     "检查项目": "inspection_item",
     "检查名称": "inspection_item",
 
-    # 检验要求相关
-    "要求": "requirements",
-    "检验要求": "requirements",
-    "标准": "requirements",
-    "标准要求": "requirements",
-    "规格": "requirements",
-    "硬度标准": "requirements",
-    "尺寸标准": "requirements",
-    "外观标准": "requirements",
+    # 规范/描述相关
+    "要求": "specification",
+    "检验要求": "specification",
+    "标准": "specification",
+    "标准要求": "specification",
+    "规格": "specification",
+    "规范": "specification",
+    "描述": "specification",
+    "硬度标准": "specification",
+    "尺寸标准": "specification",
+    "外观标准": "specification",
 
     # 检验方法相关
     "方法": "inspection_method",
@@ -93,38 +108,14 @@ FIELD_SYNONYMS: Dict[str, str] = {
     "用什么检查": "inspection_method",
     "怎么检查": "inspection_method",
 
-    # 抽样计划相关
-    "AQL": "sampling_plan",
-    "抽样": "sampling_plan",
-    "抽样计划": "sampling_plan",
-    "检验水平": "sampling_plan",
-    "抽样标准": "sampling_plan",
-
-    # 特性等级相关
-    "特性等级": "characteristic_level",
-    "等级": "characteristic_level",
-    "级别": "characteristic_level",
-    "A类": "characteristic_level",
-    "B类": "characteristic_level",
-    "C类": "characteristic_level",
-    "A级": "characteristic_level",
-    "B级": "characteristic_level",
-    "C级": "characteristic_level",
-    "关键特性": "characteristic_level",
-    "重要特性": "characteristic_level",
-
-    # 特殊特性
-    "特殊特性": "special_characteristic",
-    "SF": "special_characteristic",
-
-    # -------- document_changes 表 --------
-
-    # 变更相关
-    "变更": "change_content",
-    "变更内容": "change_content",
-    "变更记录": "change_content",
-    "变更日期": "change_date",
-    "版本变更": "version",
+    # 检查频次相关
+    "AQL": "inspection_frequency",
+    "抽样": "inspection_frequency",
+    "抽样计划": "inspection_frequency",
+    "检验水平": "inspection_frequency",
+    "检查频次": "inspection_frequency",
+    "频次": "inspection_frequency",
+    "检验频率": "inspection_frequency",
 }
 
 
@@ -141,7 +132,6 @@ OPERATOR_SYNONYMS: Dict[str, str] = {
     "不等于": "!=",
     "不是": "!=",
     "是": "=",
-    "不是": "!=",
     "在": "IN",
     "不在": "NOT IN",
     "之间": "BETWEEN",
@@ -152,10 +142,6 @@ OPERATOR_SYNONYMS: Dict[str, str] = {
     "有": "LIKE",
     "没有": "NOT LIKE",
     "不含": "NOT LIKE",
-
-    # JSON 字段
-    "AQL是": "JSON_EXTRACT",
-    "AQL为": "JSON_EXTRACT",
 }
 
 
@@ -163,24 +149,15 @@ OPERATOR_SYNONYMS: Dict[str, str] = {
 # 业务实体名称映射（表名）
 # =============================================================================
 TABLE_SYNONYMS: Dict[str, str] = {
-    # 文档表
-    "文档": "documents",
-    "SIP": "documents",
-    "SIP文档": "documents",
-    "检验标准": "documents",
-    "检验规程": "documents",
-
-    # 检验项目表
-    "检验项目": "inspection_items",
-    "检验项目表": "inspection_items",
-    "检验明细": "inspection_items",
-    "检查项目": "inspection_items",
-
-    # 变更记录表
-    "变更": "document_changes",
-    "变更记录": "document_changes",
-    "版本变更": "document_changes",
-    "历史": "document_changes",
+    "SIP": "sip_records",
+    "SIP记录": "sip_records",
+    "SIP文档": "sip_records",
+    "检验记录": "sip_records",
+    "检验项目": "sip_records",
+    "检验标准": "sip_records",
+    "检验规程": "sip_records",
+    "文档": "sip_records",
+    "记录": "sip_records",
 }
 
 
@@ -195,7 +172,6 @@ class SchemaLoader:
         self.field_synonyms = FIELD_SYNONYMS
         self.operator_synonyms = OPERATOR_SYNONYMS
         self.table_synonyms = TABLE_SYNONYMS
-        self.relationships = TABLE_RELATIONSHIPS
 
     def get_table_columns(self, table_name: str) -> List[str]:
         """获取表的所有列名"""
@@ -250,16 +226,7 @@ class SchemaLoader:
                 lines.append(line)
 
                 if examples:
-                    lines.append(f"    示例: {examples[:3]}")  # 最多显示3个
-
-        lines.append("\n" + "=" * 60)
-        lines.append("表关系:")
-        lines.append("-" * 40)
-        for rel in self.relationships:
-            lines.append(
-                f"  {rel['from_table']}.{rel['from_column']} "
-                f"→ {rel['to_table']}.{rel['to_column']} ({rel['relationship']})"
-            )
+                    lines.append(f"    示例: {examples[:3]}")
 
         lines.append("=" * 60)
 
@@ -272,10 +239,8 @@ class SchemaLoader:
         lines.append("字段同义词映射（用户说 → 数据库字段）")
         lines.append("=" * 60)
 
-        # 按表分组
         tables = {}
         for user_word, db_field in self.field_synonyms.items():
-            # 找到字段属于哪个表
             for table_name, schema in self.schemas.items():
                 if db_field in schema["columns"]:
                     if table_name not in tables:

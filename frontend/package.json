@@ -1,7 +1,7 @@
 {
   "name": "pqm-frontend",
   "version": "1.0.0",
-  "description": "质量检验知识库前端",
+  "description": "热压品质异常预测系统前端",
   "type": "module",
   "scripts": {
     "dev": "vite",

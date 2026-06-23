@@ -1,32 +1,26 @@
 """
 =============================================================================
-质量检验知识库 (PQM - Quality Inspection Knowledge Base)
+热压品质异常预测系统 (PQM - Press Quality Monitor)
 =============================================================================
-
-项目背景：
---------
-制造业需要对产品进行质量检验，检验的标准文件叫做 SIP (Standard Inspection Procedure)。
 
 系统用途：
 --------
-1. 【Text2SQL】Agent 用自然语言查询数据
+1. 【Text2SQL】Agent 用自然语言查询 sip_records 检验数据
 2. 【RAG 检索】支持向量化和全文搜索
 
 技术架构：
 --------
 FastAPI (异步API)
     ↓
-aiomysql (直连，不使用 ORM)
+asyncpg (直连，不使用 ORM)
     ↓
-MySQL 8 (数据库)
+PostgreSQL (数据库)
     ↓
 Pydantic (数据验证)
 
 数据库表：
 --------
-documents          - 文档主表
-inspection_items   - 检验项目表
-document_changes   - 版本变更记录表
+sip_records        - SIP 检验记录扁平表（单表）
 """
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -84,10 +78,10 @@ app.add_middleware(
 # 注册路由
 app.include_router(api_router, prefix=settings.API_PREFIX)
 
-# 挂载 SIP 文件目录（如果存在）
+# 挂载 SIP 文件目录（确保目录存在后挂载，不依赖启动时是否已有文件）
 DOCUMENTS_DIR = Path(__file__).parent.parent / "documents"
-if DOCUMENTS_DIR.exists():
-    app.mount("/documents", StaticFiles(directory=str(DOCUMENTS_DIR)), name="documents")
+DOCUMENTS_DIR.mkdir(exist_ok=True)
+app.mount("/documents", StaticFiles(directory=str(DOCUMENTS_DIR)), name="documents")
 
 
 @app.get("/", tags=["健康检查"])

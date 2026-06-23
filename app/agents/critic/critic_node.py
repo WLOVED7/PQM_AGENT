@@ -58,8 +58,8 @@ CRITIC_PROMPT = """你是 SQL 质量审查专家，负责验证生成的 SQL 是
 
 【无效的判定标准】
 - SQL 查询结果不能覆盖用户问题的核心需求
-- 字段名/表名与 Schema 明显不符
-- JOIN 关系完全错误
+- 字段名/表名与 Schema 明显不符（唯一允许的表: sip_records）
+- 使用了 JOIN 或引用了 sip_records 以外的表
 - 存在 SQL 注入风险（第一层已校验，此条可不重复校验）
 
 【输出格式】
@@ -71,7 +71,7 @@ class CriticValidator:
 
     def __init__(self):
         self.sql_validator = SQLValidator()
-        self.allowed_tables = {"documents", "inspection_items", "document_changes"}
+        self.allowed_tables = {"sip_records"}
 
     def basic_security_check(self, sql: str) -> tuple:
         """

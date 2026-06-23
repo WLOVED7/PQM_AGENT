@@ -13,7 +13,7 @@ LangGraph State 定义 (state/state.py)
 - Validation Domain: sql_valid, hallucination_score, critic_feedback
 - Result Domain: raw_response, final_response
 """
-from typing import TypedDict, Annotated, Optional, Literal
+from typing import TypedDict, Annotated, Optional
 from enum import Enum
 
 from app.state.reducers import merge_reducer
@@ -86,8 +86,8 @@ class AgentState(TypedDict):
     # === 全局共享 ===
     question: str
     session_id: str
-    intent: QueryIntent
-    current_step: WorkflowStep
+    intent: str          # 存字符串值，避免 Enum 类型引发 msgpack 反序列化警告
+    current_step: str    # 同上
     global_context: Annotated[dict, merge_reducer]
 
     # === 业务域 ===

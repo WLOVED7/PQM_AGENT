@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     )
 
     # ===== 应用配置 =====
-    APP_NAME: str = "质量检验知识库"
+    APP_NAME: str = "热压品质异常预测系统"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
     API_PREFIX: str = "/api/v1"

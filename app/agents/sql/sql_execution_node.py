@@ -15,6 +15,8 @@ generated_sql (已审查) → 执行 SQL → sql_result / sql_error
 【重要】
 此节点在 critic 审查通过后才被执行，确保 SQL 安全有效后才执行。
 """
+from pathlib import Path
+
 from app.state.state import AgentState, WorkflowStep
 from app.tools.sql_validator import SQLValidator, SQLValidationError
 from app.db.connection import fetch_all
@@ -22,9 +24,10 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-
-# 全局验证器
 _validator = SQLValidator()
+
+# documents 目录，与 main.py / upload.py 保持一致
+_DOCUMENTS_DIR = Path(__file__).parent.parent.parent.parent / "documents"
 
 
 async def sql_execution_node(state: AgentState) -> AgentState:
@@ -88,11 +91,22 @@ async def sql_execution_node(state: AgentState) -> AgentState:
         result["success"] = True
         result["data"] = data
         result["count"] = len(data)
-        # 提取 document_id 并拼接 PDF URL
-        document_ids = list(set(row.get("document_id") for row in data if row.get("document_id")))
-        pdf_urls = [f"documents/{doc_id}.pdf" for doc_id in document_ids]
+
+        # 提取 document_id，只附带磁盘上真实存在的 PDF
+        seen_ids = dict.fromkeys(
+            row.get("document_id") for row in data if row.get("document_id")
+        )
+        pdf_urls = []
+        for doc_id in seen_ids:
+            pdf_path = _DOCUMENTS_DIR / f"{doc_id}.pdf"
+            if pdf_path.exists():
+                pdf_urls.append(f"documents/{doc_id}.pdf")
+
         result["pdf_urls"] = pdf_urls
-        logger.info(f"SQL 执行成功，返回 {len(data)} 条数据，{len(pdf_urls)} 个 PDF 文件")
+        logger.info(
+            f"SQL 执行成功，返回 {len(data)} 条数据，"
+            f"涉及 {len(seen_ids)} 个文档，{len(pdf_urls)} 个 PDF 存在"
+        )
     except Exception as e:
         result["error"] = f"SQL 执行失败: {str(e)}"
         result["success"] = False

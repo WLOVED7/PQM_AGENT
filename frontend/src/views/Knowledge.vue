@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="nav">
-      <h1>🔬 质量检验知识库</h1>
+      <h1>🔥 热压品质异常预测系统</h1>
       <div class="nav-links">
         <router-link to="/chat">💬 对话</router-link>
         <router-link to="/upload">📤 上传</router-link>
@@ -13,7 +13,7 @@
     <div class="container">
       <div class="card">
         <h2>📚 知识库管理</h2>
-        <p style="color:#666;margin-bottom:20px">查看和管理质量检验知识库中的文档</p>
+        <p style="color:#666;margin-bottom:20px">查看和管理热压品质异常预测系统的文档</p>
 
         <div style="margin-bottom:20px">
           <input v-model="searchQuery" placeholder="搜索文档..." style="padding:10px 14px;border:1px solid #ddd;border-radius:6px;width:300px">

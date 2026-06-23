@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="nav">
-      <h1>🔬 质量检验知识库</h1>
+      <h1>🔥 热压品质异常预测系统</h1>
       <div class="nav-links">
         <router-link to="/chat">💬 对话</router-link>
         <router-link to="/upload">📤 上传</router-link>
