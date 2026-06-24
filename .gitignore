@@ -33,3 +33,6 @@ frontend/dist/
 *.tmp
 *.bak
 .cache/
+
+# Docker 离线包缓存
+pip_wheels/

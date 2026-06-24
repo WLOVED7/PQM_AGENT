@@ -22,6 +22,7 @@ Pydantic (数据验证)
 --------
 sip_records        - SIP 检验记录扁平表（单表）
 """
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -31,6 +32,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.api import api_router
+from app.api.nap import nap_router
 from app.db.connection import init_db, close_db
 
 
@@ -77,6 +79,7 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(api_router, prefix=settings.API_PREFIX)
+app.include_router(nap_router)  # NAP 协议接口：/meta /stream（无前缀，根级别）
 
 # 挂载 SIP 文件目录（确保目录存在后挂载，不依赖启动时是否已有文件）
 DOCUMENTS_DIR = Path(__file__).parent.parent / "documents"
@@ -96,8 +99,8 @@ async def root():
 
 @app.get("/health", tags=["健康检查"])
 async def health_check():
-    """健康检查"""
-    return {"status": "healthy"}
+    """健康检查 — NAP 协议要求 status 必须为 'ok'"""
+    return {"status": "ok", "timestamp": int(time.time())}
 
 
 if __name__ == "__main__":

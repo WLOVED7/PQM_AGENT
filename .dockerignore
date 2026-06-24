@@ -1,0 +1,27 @@
+# Python 虚拟环境（Windows 编译的包不能用于 Linux 容器）
+.venv/
+venv/
+env/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 前端构建产物（仅排除开发时的 node_modules）
+frontend/node_modules/
+
+# Git
+.git/
+.gitignore
+
+# 日志和临时文件
+logs/
+*.log
+
+# 本地开发工具
+.env.local
+.vscode/
+.idea/

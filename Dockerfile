@@ -2,12 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pip_wheels/ /tmp/pip_wheels/
+RUN pip install --no-cache-dir --no-index --find-links=/tmp/pip_wheels -r requirements.txt
 
 COPY . .
 

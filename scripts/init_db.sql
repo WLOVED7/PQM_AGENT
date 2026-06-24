@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS sip_records (
     version              VARCHAR(20)  NOT NULL,   -- 版本号
     chunk_text           TEXT,                    -- RAG 文本块
     created_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_sip_document_item UNIQUE (document_id, inspection_item)
 );
 
 COMMENT ON TABLE sip_records IS 'SIP 检验记录扁平表';
