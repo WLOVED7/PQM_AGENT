@@ -58,6 +58,13 @@ class Settings(BaseSettings):
     DEFAULT_PAGE_SIZE: int = 20
     MAX_PAGE_SIZE: int = 100
 
+    # ===== 管理员认证配置 =====
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = ""
+    SECRET_KEY: str = ""
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 480
+
     @property
     def DATABASE_URL(self) -> str:
         return (

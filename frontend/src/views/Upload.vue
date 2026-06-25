@@ -1,14 +1,6 @@
 <template>
   <div>
-    <div class="nav">
-      <h1>🔥 热压品质异常预测系统</h1>
-      <div class="nav-links">
-        <router-link to="/chat">💬 对话</router-link>
-        <router-link to="/upload">📤 上传</router-link>
-        <router-link to="/knowledge">📚 知识库</router-link>
-        <router-link to="/monitor">📊 监控</router-link>
-      </div>
-    </div>
+    <NavBar />
 
     <div class="container">
 
@@ -115,6 +107,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import NavBar from '../components/NavBar.vue'
 
 // ---- Excel ----
 const excelFile = ref(null)

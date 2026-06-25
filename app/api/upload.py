@@ -20,10 +20,11 @@ Excel 列顺序（共12列）:
 import io
 import re
 from pathlib import Path
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from openpyxl import load_workbook
 from pypdf import PdfReader
 
+from app.core.auth import verify_admin_token
 from app.db.connection import execute, fetch_one, fetch_all
 from app.utils.logger import get_logger
 
@@ -316,3 +317,29 @@ async def get_prompt_hints():
         LIMIT 12
     """)
     return {"hints": [dict(r) for r in rows]}
+
+
+@router.delete("/sip/{document_id}", dependencies=[Depends(verify_admin_token)])
+async def delete_sip(document_id: str):
+    """
+    删除指定文件号下所有 sip_records 行，同时删除 documents/ 目录下对应的 PDF。
+    需要管理员 JWT 令牌。
+    """
+    deleted = await execute(
+        "DELETE FROM sip_records WHERE document_id = $1", (document_id,)
+    )
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail=f"文件号 {document_id} 不存在")
+
+    pdf_path = _DOCUMENTS_DIR / f"{document_id}.pdf"
+    pdf_deleted = pdf_path.exists()
+    if pdf_deleted:
+        pdf_path.unlink()
+
+    logger.info(f"SIP 删除成功: {document_id}, 行数={deleted}, PDF={pdf_deleted}")
+    return {
+        "success": True,
+        "document_id": document_id,
+        "records_deleted": deleted,
+        "pdf_deleted": pdf_deleted,
+    }

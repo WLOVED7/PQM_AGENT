@@ -1,14 +1,6 @@
 <template>
   <div>
-    <div class="nav">
-      <h1>🔥 热压品质异常预测系统</h1>
-      <div class="nav-links">
-        <router-link to="/chat">💬 对话</router-link>
-        <router-link to="/upload">📤 上传</router-link>
-        <router-link to="/knowledge">📚 知识库</router-link>
-        <router-link to="/monitor">📊 监控</router-link>
-      </div>
-    </div>
+    <NavBar />
 
     <div class="container">
 
@@ -57,6 +49,13 @@
                          display:inline-flex;align-items:center;gap:3px"
                 >📄 查看 SIP</a>
                 <span v-else style="font-size:12px;color:#d1d5db">暂无 PDF</span>
+                <button
+                  v-if="auth.isAdmin"
+                  @click="deleteSip(p.document_id, p.part_name)"
+                  style="display:block;margin-top:6px;padding:3px 10px;background:#fee2e2;
+                         color:#dc2626;border:1px solid #fca5a5;border-radius:4px;
+                         font-size:11px;cursor:pointer"
+                >删除</button>
               </div>
             </div>
           </div>
@@ -132,10 +131,13 @@
 <script setup>
 import { ref, nextTick, watch, onMounted } from 'vue'
 import { useChatStore } from '../store/chat'
+import { useAuthStore } from '../store/auth'
 import { storeToRefs } from 'pinia'
+import NavBar from '../components/NavBar.vue'
 
 const chatStore = useChatStore()
 const { messages, isLoading, lastCanceled, thinkingLabel } = storeToRefs(chatStore)
+const auth = useAuthStore()
 
 const question = ref('')
 const sessionId = ref('user-001')
@@ -193,6 +195,32 @@ async function toggleCustomer(name) {
     customerParts.value = []
   } finally {
     partsLoading.value = false
+  }
+}
+
+async function deleteSip(documentId, partName) {
+  if (!confirm(`确定要删除 "${partName}" (${documentId}) 的全部 SIP 记录吗？此操作不可撤销。`)) return
+  try {
+    const resp = await fetch(`/api/v1/upload/sip/${encodeURIComponent(documentId)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${auth.token}` },
+    })
+    if (!resp.ok) {
+      const data = await resp.json()
+      alert(`删除失败: ${data.detail || resp.status}`)
+      return
+    }
+    // 从当前列表中移除已删除的条目
+    customerParts.value = customerParts.value.filter(p => p.document_id !== documentId)
+    // 若该客户下已无记录，刷新客户列表并收起面板
+    if (customerParts.value.length === 0) {
+      activeCustomer.value = null
+      customerParts.value = null
+      const resp2 = await fetch('/api/v1/upload/customers')
+      customers.value = (await resp2.json()).customers || []
+    }
+  } catch (e) {
+    alert(`删除失败: ${e.message}`)
   }
 }
 
