@@ -56,11 +56,15 @@ SQL_GENERATION_PROMPT = """你是热压品质异常预测系统的 SQL 生成专
 5. specification、inspection_method、inspection_frequency 均为 TEXT 普通字段，直接用 LIKE 查询
 6. LIMIT 默认 100，最大不超过 100
 7. 每次查询必须在 SELECT 中包含 document_id 字段，用于拼接 PDF 链接
-8. 当用户提到工序名称（来料、热压、镭射、落料等），必须加 WHERE process = '工序名'
-   - "来料" / "来料检验" → process = '来料'
-   - "热压" / "热压工序" → process = '热压'
-   - "镭射"             → process = '镭射'
-   - "落料"             → process = '落料'
+8. 当用户提到工序名称，必须加 WHERE process = '工序名'，完整映射如下：
+   - "来料" / "来料检验" / "IQC"  → process = '来料'
+   - "热压" / "热压工序"          → process = '热压'
+   - "镭射"                       → process = '镭射'
+   - "落料"                       → process = '落料'
+   - "抛丸"                       → process = '抛丸'
+   - "全检"                       → process = '全检'
+   - "出货" / "出货检验" / "OQC"  → process = '出货'
+   - "冷冲"                       → process = '冷冲'
 9. 【去重规则 - 必须遵守】当用户询问检验标准/要求/规范时，
    必须使用 DISTINCT ON (customer, part_name, process, inspection_item)
    并搭配 ORDER BY customer, part_name, process, inspection_item, version DESC
