@@ -121,8 +121,15 @@ def get_llm(config: Optional[LLMConfig] = None) -> BaseLLM:
     return BaseLLM(config)
 
 
+# 进程级单例：所有 Agent 节点共享同一实例，共享 HTTP 连接池
+_shared_llm: Optional[BaseLLM] = None
+
+
 def create_chat_llm() -> BaseLLM:
-    """创建 LangChain LLM 实例（用于 LangGraph）"""
-    return BaseLLM()
+    """返回进程级单例 LLM 实例（用于 LangGraph）"""
+    global _shared_llm
+    if _shared_llm is None:
+        _shared_llm = BaseLLM()
+    return _shared_llm
 
 

@@ -22,6 +22,7 @@ Pydantic (数据验证)
 --------
 sip_records        - SIP 检验记录扁平表（单表）
 """
+import asyncio
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -34,15 +35,28 @@ from app.core.config import settings
 from app.api import api_router
 from app.api.nap import nap_router
 from app.db.connection import init_db, close_db
+from app.utils.logger import get_logger
+
+_logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
-    # 启动时
     await init_db()
+
+    # 预热 LLM：触发包导入 + 建立 TCP/TLS 连接，消除首次请求冷启动延迟
+    try:
+        from langchain_core.messages import HumanMessage
+        from app.agents.base.llm import create_chat_llm
+        _logger.info("正在预热 LLM 连接...")
+        llm = create_chat_llm()
+        await asyncio.to_thread(llm.invoke, [HumanMessage(content=".")])
+        _logger.info("LLM 预热完成")
+    except Exception as e:
+        _logger.warning(f"LLM 预热失败（不影响启动）: {e}")
+
     yield
-    # 关闭时
     await close_db()
 
 
