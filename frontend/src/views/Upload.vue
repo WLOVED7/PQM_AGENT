@@ -15,36 +15,41 @@
         </p>
 
         <div style="border:2px dashed #ddd;border-radius:12px;padding:32px;text-align:center;margin-bottom:16px">
-          <input type="file" accept=".xlsx,.xls" @change="handleExcelSelect" style="display:none" ref="excelInput">
+          <input type="file" accept=".xlsx,.xls" multiple @change="handleExcelSelect" style="display:none" ref="excelInput">
           <button class="btn-secondary" @click="$refs.excelInput.click()">选择 Excel 文件</button>
-          <p style="margin-top:8px;color:#999;font-size:13px">支持 .xlsx / .xls</p>
+          <p style="margin-top:8px;color:#999;font-size:13px">支持多选 .xlsx / .xls，逐个导入</p>
         </div>
 
-        <div v-if="excelFile">
-          <div style="padding:10px;background:#f8f8f8;border-radius:6px;margin-bottom:12px">
-            📄 {{ excelFile.name }} — {{ (excelFile.size / 1024).toFixed(1) }} KB
+        <div v-if="excelFiles.length">
+          <div v-for="(ef, i) in excelFiles" :key="i"
+            style="padding:10px 12px;background:#f8f8f8;border-radius:8px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="flex:1;font-size:13px">📊 {{ ef.file.name }} — {{ (ef.file.size / 1024).toFixed(1) }} KB</span>
+              <span v-if="ef.status === 'pending'" style="color:#999;font-size:12px">待导入</span>
+              <span v-else-if="ef.status === 'uploading'" style="color:#667eea;font-size:12px">导入中...</span>
+              <span v-else-if="ef.status === 'ok'" style="color:#16a34a;font-size:12px">
+                ✅ 新增 {{ ef.result.inserted }} | 更新 {{ ef.result.updated }} | 跳过 {{ ef.result.skipped }}
+              </span>
+              <span v-else style="color:#dc2626;font-size:12px">❌ {{ ef.errorMsg }}</span>
+            </div>
+            <div v-if="ef.status === 'ok' && ef.result.error_details && ef.result.error_details.length"
+              style="margin-top:6px;font-size:11px;color:#dc2626">
+              <div v-for="(e, j) in ef.result.error_details" :key="j">{{ e }}</div>
+            </div>
           </div>
-          <button @click="uploadExcel" :disabled="excelUploading"
-            style="padding:12px 24px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer"
-            :style="excelUploading ? 'opacity:0.6;cursor:not-allowed' : ''">
-            {{ excelUploading ? '导入中...' : '开始导入' }}
-          </button>
-        </div>
 
-        <div v-if="excelResult" style="margin-top:16px;padding:14px;border-radius:8px"
-          :style="excelResult.success ? 'background:#f0fdf4;border:1px solid #86efac' : 'background:#fef2f2;border:1px solid #fca5a5'">
-          <div style="font-weight:bold;margin-bottom:6px">
-            {{ excelResult.success ? '✅ 导入完成' : '❌ 导入失败' }}
-          </div>
-          <div style="font-size:14px;color:#555">
-            新增：<b>{{ excelResult.inserted }}</b> 条 &nbsp;|&nbsp;
-            更新：<b>{{ excelResult.updated }}</b> 条 &nbsp;|&nbsp;
-            跳过：<b>{{ excelResult.skipped }}</b> 条 &nbsp;|&nbsp;
-            错误：<b>{{ excelResult.errors }}</b> 条
-          </div>
-          <div v-if="excelResult.error_details && excelResult.error_details.length"
-            style="margin-top:8px;font-size:12px;color:#dc2626">
-            <div v-for="(e, i) in excelResult.error_details" :key="i">{{ e }}</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap">
+            <button @click="uploadExcels" :disabled="excelUploading || allExcelsDone"
+              style="padding:12px 24px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer"
+              :style="(excelUploading || allExcelsDone) ? 'opacity:0.6;cursor:not-allowed' : ''">
+              {{ excelUploading ? '导入中...' : `导入 ${pendingExcelCount} 个文件` }}
+            </button>
+            <div v-if="excelTotalResult" style="font-size:13px;color:#555">
+              合计：新增 <b>{{ excelTotalResult.inserted }}</b> |
+              更新 <b>{{ excelTotalResult.updated }}</b> |
+              跳过 <b>{{ excelTotalResult.skipped }}</b> |
+              错误 <b>{{ excelTotalResult.errors }}</b>
+            </div>
           </div>
         </div>
       </div>
@@ -110,33 +115,56 @@ import { ref, computed } from 'vue'
 import NavBar from '../components/NavBar.vue'
 
 // ---- Excel ----
-const excelFile = ref(null)
+// ef 结构: { file, status: 'pending'|'uploading'|'ok'|'error', result, errorMsg }
+const excelFiles = ref([])
 const excelInput = ref(null)
 const excelUploading = ref(false)
-const excelResult = ref(null)
+
+const pendingExcelCount = computed(() => excelFiles.value.filter(f => f.status === 'pending').length)
+const allExcelsDone = computed(() => excelFiles.value.length > 0 && excelFiles.value.every(f => f.status !== 'pending'))
+const excelTotalResult = computed(() => {
+  const done = excelFiles.value.filter(f => f.status === 'ok')
+  if (!done.length) return null
+  return done.reduce((acc, f) => ({
+    inserted: acc.inserted + (f.result.inserted || 0),
+    updated:  acc.updated  + (f.result.updated  || 0),
+    skipped:  acc.skipped  + (f.result.skipped  || 0),
+    errors:   acc.errors   + (f.result.errors   || 0),
+  }), { inserted: 0, updated: 0, skipped: 0, errors: 0 })
+})
 
 function handleExcelSelect(e) {
-  excelFile.value = e.target.files[0] || null
-  excelResult.value = null
+  const newFiles = Array.from(e.target.files).map(f => ({
+    file: f, status: 'pending', result: null, errorMsg: '',
+  }))
+  excelFiles.value = [...excelFiles.value, ...newFiles]
+  e.target.value = ''
 }
 
-async function uploadExcel() {
-  if (!excelFile.value || excelUploading.value) return
+async function uploadExcels() {
+  if (!excelFiles.value.length || excelUploading.value) return
   excelUploading.value = true
-  excelResult.value = null
-  const fd = new FormData()
-  fd.append('file', excelFile.value)
-  try {
-    const resp = await fetch('/api/v1/upload/excel', { method: 'POST', body: fd })
-    const data = await resp.json()
-    excelResult.value = resp.ok
-      ? data
-      : { success: false, inserted: 0, skipped: 0, errors: 1, error_details: [data.detail || '上传失败'] }
-  } catch (e) {
-    excelResult.value = { success: false, inserted: 0, skipped: 0, errors: 1, error_details: [String(e)] }
-  } finally {
-    excelUploading.value = false
+  for (const ef of excelFiles.value) {
+    if (ef.status !== 'pending') continue
+    ef.status = 'uploading'
+    const fd = new FormData()
+    fd.append('file', ef.file)
+    try {
+      const resp = await fetch('/api/v1/upload/excel', { method: 'POST', body: fd })
+      const data = await resp.json()
+      if (resp.ok) {
+        ef.status = 'ok'
+        ef.result = data
+      } else {
+        ef.status = 'error'
+        ef.errorMsg = data.detail || '导入失败'
+      }
+    } catch (err) {
+      ef.status = 'error'
+      ef.errorMsg = String(err)
+    }
   }
+  excelUploading.value = false
 }
 
 // ---- PDF ----

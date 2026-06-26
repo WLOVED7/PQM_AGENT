@@ -52,46 +52,78 @@ SQL_GENERATION_PROMPT = """你是热压品质异常预测系统的 SQL 生成专
    - "热压" / "热压工序" → process = '热压'
    - "镭射"             → process = '镭射'
    - "落料"             → process = '落料'
+9. 【去重规则 - 必须遵守】当用户询问检验标准/要求/规范时，
+   必须使用 DISTINCT ON (customer, part_name, process, inspection_item)
+   并搭配 ORDER BY customer, part_name, process, inspection_item, version DESC
+   以确保同一客户+零件+工序+检验项只返回最新版本的一条记录。
+   这是默认行为，除非用户明确要求查看所有版本或所有文件。
+
+【标准查询模板（询问标准/要求时使用）】
+SELECT DISTINCT ON (customer, part_name, process, inspection_item)
+    customer, part_name, process, inspection_item,
+    specification, inspection_method, inspection_frequency,
+    version, document_id
+FROM sip_records
+WHERE <条件>
+ORDER BY customer, part_name, process, inspection_item, version DESC
+LIMIT 100
 
 【示例】
 用户问题: 比亚迪前横梁的检查标准是什么？
 SQL:
-SELECT inspection_item, specification, inspection_method, inspection_frequency, document_id
+SELECT DISTINCT ON (customer, part_name, process, inspection_item)
+    customer, part_name, process, inspection_item,
+    specification, inspection_method, inspection_frequency,
+    version, document_id
 FROM sip_records
 WHERE customer = '比亚迪'
   AND part_name LIKE '%前横梁%'
+ORDER BY customer, part_name, process, inspection_item, version DESC
 LIMIT 100
 
 用户问题: 比亚迪前横梁来料外观检测标准是什么？
 SQL:
-SELECT inspection_item, specification, inspection_method, inspection_frequency, document_id
+SELECT DISTINCT ON (customer, part_name, process, inspection_item)
+    customer, part_name, process, inspection_item,
+    specification, inspection_method, inspection_frequency,
+    version, document_id
 FROM sip_records
 WHERE customer = '比亚迪'
   AND part_name LIKE '%前横梁%'
   AND process = '来料'
   AND inspection_item LIKE '%外观%'
+ORDER BY customer, part_name, process, inspection_item, version DESC
 LIMIT 100
 
 用户问题: 热压工序的检验项有哪些？
 SQL:
-SELECT inspection_item, specification, inspection_method, document_id
+SELECT DISTINCT ON (customer, part_name, process, inspection_item)
+    customer, part_name, process, inspection_item,
+    specification, inspection_method, document_id
 FROM sip_records
 WHERE process = '热压'
+ORDER BY customer, part_name, process, inspection_item, version DESC
 LIMIT 100
 
 用户问题: AQL是0.65的检验项有哪些？
 SQL:
-SELECT inspection_item, inspection_frequency, part_name, document_id
+SELECT DISTINCT ON (customer, part_name, process, inspection_item)
+    customer, part_name, process, inspection_item,
+    inspection_frequency, document_id
 FROM sip_records
 WHERE inspection_frequency LIKE '%0.65%'
+ORDER BY customer, part_name, process, inspection_item, version DESC
 LIMIT 100
 
 用户问题: 前横梁的机械性能要求是什么？
 SQL:
-SELECT inspection_item, specification, inspection_method, document_id
+SELECT DISTINCT ON (customer, part_name, process, inspection_item)
+    customer, part_name, process, inspection_item,
+    specification, inspection_method, version, document_id
 FROM sip_records
 WHERE part_name LIKE '%前横梁%'
   AND inspection_item LIKE '%机械性能%'
+ORDER BY customer, part_name, process, inspection_item, version DESC
 LIMIT 100
 """
 
