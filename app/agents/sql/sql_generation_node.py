@@ -27,6 +27,15 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# 进程级 schema 缓存（schema 文件启动后不变，缓存一次即可）
+_schema_cache: dict = {}
+
+def _get_schema_context() -> tuple[str, str]:
+    if not _schema_cache:
+        _schema_cache["schema"] = schema_loader.generate_schema_context()
+        _schema_cache["synonyms"] = schema_loader.generate_synonym_context()
+    return _schema_cache["schema"], _schema_cache["synonyms"]
+
 
 # =============================================================================
 # SQL 生成 Prompt
@@ -151,9 +160,8 @@ async def sql_generation_node(state: AgentState) -> AgentState:
     # 获取对话历史上下文
     history_context = session_memory.get_context_for_llm(session_id, limit=3)
 
-    # 构建 Schema 上下文
-    schema_context = schema_loader.generate_schema_context()
-    synonym_context = schema_loader.generate_synonym_context()
+    # 构建 Schema 上下文（进程级缓存）
+    schema_context, synonym_context = _get_schema_context()
 
     # 构建 Prompt
     prompt = SQL_GENERATION_PROMPT.format(

@@ -255,20 +255,13 @@ async def critic_node(state: AgentState) -> AgentState:
         }
     logger.debug("第二层校验通过")
 
-    # 第三层: LLM 语义校验
-    logger.debug("第三层：LLM 语义校验")
-    schema_context = schema_loader.generate_schema_context()
-    semantic_result = validator.semantic_check(question, generated_sql, schema_context)
-    logger.info(f"LLM 语义校验完成：is_valid={semantic_result['is_valid']}, needs_regeneration={semantic_result['needs_regeneration']}, feedback={semantic_result.get('feedback', '')}")
-
-    if not semantic_result["is_valid"]:
-        logger.warning(f"SQL 语义审查未通过：{semantic_result.get('feedback', '未知原因')}")
-
+    # 两层规则校验均通过，直接判定有效（跳过 LLM 语义校验以降低延迟）
+    logger.info("两层规则校验通过，SQL 有效")
     return {
         "sql": {"retry_count": sql_domain.get("retry_count", 0) + 1},
         "validation": {
-            "sql_valid": semantic_result["is_valid"],
-            "critic_feedback": semantic_result["feedback"] or "SQL 审查完成",
+            "sql_valid": True,
+            "critic_feedback": "规则校验通过",
         },
         "current_step": WorkflowStep.CRITIC_REVIEW,
     }
